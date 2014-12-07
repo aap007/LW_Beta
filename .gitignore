@@ -41,3 +41,28 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+
+# Custom ignore below
+
+# =============== #
+# Unity generated #
+# =============== #
+Temp/
+Library/
+ 
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+ExportedObj/
+obj/
+*.svd
+*.userprefs
+/*.csproj
+*.pidb
+*.suo
+/*.sln
+*.user
+*.unityproj
+*.booproj
+
