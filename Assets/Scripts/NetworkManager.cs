@@ -48,10 +48,9 @@ public class NetworkManager : MonoBehaviour {
 		playing = true;
 	}
 	void OnPlayerConnected(NetworkPlayer player) {
-		Debug.Log("Player " + playersConnected + " connected from " + player.ipAddress + ":" + player.port);
-		Debug.Log ("Spawning field on server at X-coordinate: " + 25*playersConnected);
-		GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(25*playersConnected, 0, 0), Quaternion.identity, 0);
-		
+		//Debug.Log("Player " + playersConnected + " connected from " + player.ipAddress + ":" + player.port);
+		//Debug.Log ("Spawning field on server at X-coordinate: " + 25*playersConnected);
+		GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(25*(playerList.Count), 0, 0), Quaternion.identity, 0);
 		playerList.Add(player);
 	}
 	void OnDisconnectedFromServer(NetworkDisconnection info) {
