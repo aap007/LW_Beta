@@ -9,7 +9,7 @@ using System.Collections.Generic;
 public class NetworkManager : MonoBehaviour {
 
 	public GameObject playerPrefab;
-	private List<NetworkPlayer> playerTracker;
+	private List<C_PlayerManager> playerTracker;
 	
 	
 
@@ -38,7 +38,7 @@ public class NetworkManager : MonoBehaviour {
 	}
 
 	void OnCreate() {
-		playerList = new List<NetworkPlayer>();
+		playerTracker = new List<C_PlayerManager>();
 	}
 
 	void OnMasterServerEvent(MasterServerEvent msEvent) {
@@ -65,19 +65,17 @@ public class NetworkManager : MonoBehaviour {
 	void OnPlayerConnected(NetworkPlayer player) {
 		//Debug.Log("Player " + playersConnected + " connected from " + player.ipAddress + ":" + player.port);
 		//Debug.Log ("Spawning field on server at X-coordinate: " + 25*playersConnected);
-		//GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(25*(playerList.Count), 0, 0), Quaternion.identity, 0);
+/*		//GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(25*(playerList.Count), 0, 0), Quaternion.identity, 0);
 		GameObject handle = Network.Instantiate(playerPrefab, transform.position, Quaternion.identity, NetworkGroup.PLAYER);
-		Object client = handle.GetComponent(C_PlayerManager);
+		C_PlayerManager client = (C_PlayerManager)handle.GetComponent(C_PlayerManager);
 		if (!client) {
 			Debug.LogError("The prefab has no C_PlayerManager attached!");
-		}
-		playerTracker.Add(client);
+		}*/
+//		playerTracker.Add(client);
 		//Get the network view of the player and add its owner
-		NetworkView netview = handle.GetComponent(NetworkView);
-		netView.RPC("setOwner", RPCMode.AllBuffered, spawn);
+//		NetworkView netView = (NetworkView)handle.GetComponent(NetworkView);
+		//netView.RPC("setOwner", RPCMode.AllBuffered, spawn);
 	}
-	
-	
 	
 	
 	void OnDisconnectedFromServer(NetworkDisconnection info) {
