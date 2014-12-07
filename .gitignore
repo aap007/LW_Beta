@@ -50,6 +50,7 @@ Temporary Items
 # =============== #
 Temp/
 Library/
+Builds/
  
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
