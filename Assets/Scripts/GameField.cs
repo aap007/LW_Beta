@@ -8,8 +8,6 @@ public class GameField : MonoBehaviour {
 
 	public Enemy enemyPrefab = null;
 	
-	public Player player = null;
-	
 	private Transform spawnPoint;
 	private Transform endPoint;
 	

@@ -2,7 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 
+/**
+ * Server-side implementation for the generic network manager.
+ * In this class are ONLY functions that are called on or as the server
+ */
 public class NetworkManager : MonoBehaviour {
+
+	public GameObject playerPrefab;
+	private List<NetworkPlayer> playerTracker;
+	
+	
+
 	public GUISkin skin = null;
 
 	public float widthPercent = 0.3f;
@@ -19,8 +29,13 @@ public class NetworkManager : MonoBehaviour {
 	
 	public GameField gameFieldPrefab;
 	
-	private List<NetworkPlayer> playerList;
 	
+	
+	public enum NetworkGroup {
+		DEFAULT = 0,
+		PLAYER  = 1,
+		SERVER  = 2
+	}
 
 	void OnCreate() {
 		playerList = new List<NetworkPlayer>();
@@ -50,9 +65,21 @@ public class NetworkManager : MonoBehaviour {
 	void OnPlayerConnected(NetworkPlayer player) {
 		//Debug.Log("Player " + playersConnected + " connected from " + player.ipAddress + ":" + player.port);
 		//Debug.Log ("Spawning field on server at X-coordinate: " + 25*playersConnected);
-		GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(25*(playerList.Count), 0, 0), Quaternion.identity, 0);
-		playerList.Add(player);
+		//GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(25*(playerList.Count), 0, 0), Quaternion.identity, 0);
+		GameObject handle = Network.Instantiate(playerPrefab, transform.position, Quaternion.identity, NetworkGroup.PLAYER);
+		Object client = handle.GetComponent(C_PlayerManager);
+		if (!client) {
+			Debug.LogError("The prefab has no C_PlayerManager attached!");
+		}
+		playerTracker.Add(client);
+		//Get the network view of the player and add its owner
+		NetworkView netview = handle.GetComponent(NetworkView);
+		netView.RPC("setOwner", RPCMode.AllBuffered, spawn);
 	}
+	
+	
+	
+	
 	void OnDisconnectedFromServer(NetworkDisconnection info) {
 		if (Network.isServer)
 			Debug.Log("Local server connection disconnected");

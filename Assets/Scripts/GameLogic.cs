@@ -6,8 +6,6 @@ public class GameLogic : MonoBehaviour {
 
 	public List<GameField> gameFields;
 	
-	private List<Player> players;
-	
 	const int GOLD_PER_SEC = 1;
 	const int STARTING_GOLD = 100;
 	const int STARTING_LIFE = 20;
@@ -26,11 +24,11 @@ public class GameLogic : MonoBehaviour {
 	}
 	
 	public void AddPlayer() {
-		for (int i=0; i<gameFields.Count; i++) {
+		/*for (int i=0; i<gameFields.Count; i++) {
 			if (gameFields[i].player == null) {
 				gameFields[i].player = new Player();
 				return;
 			}
-		}
+		}*/
 	}
 }
