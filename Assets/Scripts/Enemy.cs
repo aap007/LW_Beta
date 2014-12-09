@@ -3,16 +3,15 @@ using System.Collections;
 
 public class Enemy : MonoBehaviour {
 
+	// Settings
 	public int health = 5;
 	public int speed = 25;
 
-	public Vector3 vDestination;
+	// Privates
+	private Vector3 vDestination;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
 	
+	// EVENTS
 	void Update () {
 		//TextMesh tm = GetComponentInChildren<TextMesh>();
 		//tm.text = new string('-', health);
@@ -22,6 +21,8 @@ public class Enemy : MonoBehaviour {
 		//tm.transform.forward = Camera.main.transform.forward;
 	}
 
+
+	// FUNCTIONS
 	public void SetDestination(Vector3 destination) {
 		vDestination = destination;
 		AstarAI ai = (AstarAI)gameObject.GetComponent<AstarAI>();

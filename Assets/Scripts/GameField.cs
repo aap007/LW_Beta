@@ -3,19 +3,22 @@ using System.Collections;
 
 public class GameField : MonoBehaviour {
 
-	public float interval = 3.0f;
-	float timeLeft = 0.0f;
-
+	// Settings
 	public Enemy enemyPrefab = null;
+	public float interval = 3.0f;
+
+	// Privates
+	private float timeLeft = 0.0f;
 	
 	private Transform spawnPoint;
 	private Transform endPoint;
 	
+	
+	// EVENTS
 	void Start () {
 		spawnPoint = transform.FindChild("SpawnPoint");
 		endPoint = transform.FindChild("EndPoint");
 	}
-	
 	void Update () {
 		timeLeft -= Time.deltaTime;
 		if (timeLeft <= 0.0f) {
@@ -34,6 +37,8 @@ public class GameField : MonoBehaviour {
 		}
 	}
 	
+	
+	// FUNCTIONS
 	public Vector3 GetEndpoint() {
 		return endPoint.position;
 	}

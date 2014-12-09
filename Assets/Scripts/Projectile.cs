@@ -3,12 +3,16 @@ using System.Collections;
 
 public class Projectile : MonoBehaviour {
 	
+	// Settings
 	public float speed = 10.0f;
 	public int damage = 1;
 	
+	// Privates
 	// Destination set by Tower when creating the bullet
-	Transform destination;
+	private Transform destination;
 	
+	
+	// EVENTS
 	void Update () {
 		// Destroy bullet if destination does not exist anymore
 		if (destination == null) {
@@ -30,6 +34,8 @@ public class Projectile : MonoBehaviour {
 			Destroy(gameObject);
 		}
 	}
+	
+	// FUNCTIONS
 	public void SetDestination(Transform v) {
 		destination = v;
 	}

@@ -3,40 +3,23 @@ using System.Collections;
 
 public class Tower : MonoBehaviour {
 
+	// Settings
 	public Projectile bulletPrefab = null;
 	public int bulletDamage = 1;
-	
-	// interval
 	public float interval = 2.0f;
-	float timeLeft = 0.0f;
 	
-	// attack range
 	public float range = 10.0f;
 	public float rangeTurn = 15.0f;
 	public float turnSpeed = 4.0f;
 	
-	// Build information
 	public int buildPrice = 1;
 	
+	// Privates
+	private float timeLeft = 0.0f;
 	private Enemy target = null;
+
 	
-	private Enemy findClosestTarget() {
-		Enemy closest = null;
-		Vector3 pos = transform.position;
-		Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
-		if ((enemies != null) && (enemies.Length > 0)) {
-			closest = enemies[0];
-			for (int i = 1; i < enemies.Length; ++i) {
-				float cur = Vector3.Distance(pos, enemies[i].transform.position);
-				float old = Vector3.Distance(pos, closest.transform.position);
-				if (cur < old) {
-					closest = enemies[i];
-				}
-			}
-		}
-		return closest;
-	}
-	
+	// EVENTS
 	void Update() {
 		if (target == null) {
 			target = findClosestTarget();
@@ -73,5 +56,24 @@ public class Tower : MonoBehaviour {
 				
 			}	
 		}
+	}
+	
+	
+	// HELPER FUNCTIONS
+	private Enemy findClosestTarget() {
+		Enemy closest = null;
+		Vector3 pos = transform.position;
+		Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
+		if ((enemies != null) && (enemies.Length > 0)) {
+			closest = enemies[0];
+			for (int i = 1; i < enemies.Length; ++i) {
+				float cur = Vector3.Distance(pos, enemies[i].transform.position);
+				float old = Vector3.Distance(pos, closest.transform.position);
+				if (cur < old) {
+					closest = enemies[i];
+				}
+			}
+		}
+		return closest;
 	}
 }
