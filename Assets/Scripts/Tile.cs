@@ -21,6 +21,7 @@ public class Tile : MonoBehaviour {
 			graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
 			// Iterate through all units and update their current route
 			Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
+			// TODO: this is ugly code, please fix
 			for (int i = 0; i < enemies.Length; ++i) {
 				enemies[i].SetDestination(enemies[i].vDestination);
 			}

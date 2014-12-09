@@ -7,8 +7,8 @@ public class Enemy : MonoBehaviour {
 	public int health = 5;
 	public int speed = 25;
 
-	// Privates
-	private Vector3 vDestination;
+	
+	public Vector3 vDestination;
 
 	
 	// EVENTS

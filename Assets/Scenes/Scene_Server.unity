@@ -87,8 +87,9 @@ GameObject:
   - 124: {fileID: 873623526}
   - 81: {fileID: 873623525}
   - 114: {fileID: 873623531}
+  - 148: {fileID: 873623530}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: Server
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -121,7 +122,7 @@ Camera:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 873623524}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: .192156866, g: .301960796, b: .474509805, a: .0196078438}
@@ -159,6 +160,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!148 &873623530
+NetworkView:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 873623524}
+  m_Enabled: 1
+  m_StateSynchronization: 1
+  m_Observed: {fileID: 873623529}
+  m_ViewID:
+    m_ID: 1
+    m_Type: 1
 --- !u!114 &873623531
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,9 +183,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 054a673f01ce7e74aa4138ca4e389c3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 0}
-  skin: {fileID: 0}
+  playerManager: {fileID: 11400000, guid: c319cb3bc58694349b6fa03a37ed721e, type: 2}
   widthPercent: .300000012
   heightPercent: .300000012
-  logo: {fileID: 0}
-  gameFieldPrefab: {fileID: 0}

@@ -21,6 +21,7 @@ public class C_PlayerManager : MonoBehaviour {
 	void SetOwner(NetworkPlayer p) {
 		if (Network.isServer) {
 			owner = p;
+			Debug.Log("Owner set");
 		}
 	}
 	

@@ -83,6 +83,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 48642894}
   - 114: {fileID: 48642893}
+  - 148: {fileID: 48642895}
   m_Layer: 0
   m_Name: C_NetworkManager
   m_TagString: Untagged
@@ -115,3 +116,15 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!148 &48642895
+NetworkView:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 48642892}
+  m_Enabled: 1
+  m_StateSynchronization: 1
+  m_Observed: {fileID: 48642894}
+  m_ViewID:
+    m_ID: 1
+    m_Type: 1

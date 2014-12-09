@@ -5,14 +5,18 @@ using System.Collections.Generic;
 [RequireComponent(typeof(NetworkView))]
 public class C_NetworkManager : MonoBehaviour {
 
+	// Settings
 	public float widthPercent = 0.3f;
 	public float heightPercent = 0.3f;
 	
+	// Constants
 	private const string typeName = "LW_BETA_SECRET";
 	private const string gameName = "Join_me";
-	bool playing = false;
 	
+	// Privates
+	private bool playing = false;
 	private HostData[] hostList;
+	
 	
 	// MASTER SERVER EVENTS
 	void OnMasterServerEvent(MasterServerEvent msEvent) {

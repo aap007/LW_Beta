@@ -5,8 +5,8 @@ using System.Collections.Generic;
 [RequireComponent(typeof(NetworkView))]
 public class NetworkManager : MonoBehaviour {
 
-	// References
-	private PlayerManager playerManager;
+	// Settings
+	public PlayerManager playerManager;
 
 	// Private stuff
 	private enum NetworkGroup {
@@ -24,14 +24,6 @@ public class NetworkManager : MonoBehaviour {
 	private const int MAX_PLAYERS = 8;	
 	private const string typeName = "LW_BETA_SECRET";
 	private const string gameName = "Join_me";
-	
-
-	// EVENTS
-	void OnCreate() {
-		// Resolve reference to PlayerManager object
-		// TODO: for now create it dynamically
-		playerManager = new PlayerManager ();
-	}
 	
 	
 	// MASTER SERVER EVENTS
@@ -72,6 +64,7 @@ public class NetworkManager : MonoBehaviour {
 	// FUNCTIONS
 	private void StartServer() {
 		Network.InitializeServer(MAX_PLAYERS, NETWORK_PORT, !Network.HavePublicAddress());
+		Instantiate(playerManager);
 	}
 
 
