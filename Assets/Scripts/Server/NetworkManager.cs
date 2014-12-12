@@ -5,10 +5,8 @@ using System.Collections.Generic;
 [RequireComponent(typeof(NetworkView))]
 public class NetworkManager : MonoBehaviour {
 
-	// Settings
-	public PlayerManager playerManager;
-
 	// Private stuff
+	private PlayerManager playerManager;
 	private enum NetworkGroup {
 		DEFAULT = 0,
 		PLAYER  = 1,
@@ -25,6 +23,13 @@ public class NetworkManager : MonoBehaviour {
 	private const string typeName = "LW_BETA_SECRET";
 	private const string gameName = "Join_me";
 	
+	
+	// EVENTS
+	void Awake() {
+		// Store reference to player manager, which is attached
+		// to the same game component as this script.
+		playerManager = GetComponent<PlayerManager>();
+	}
 	
 	// MASTER SERVER EVENTS
 	void OnMasterServerEvent(MasterServerEvent msEvent) {
@@ -64,7 +69,6 @@ public class NetworkManager : MonoBehaviour {
 	// FUNCTIONS
 	private void StartServer() {
 		Network.InitializeServer(MAX_PLAYERS, NETWORK_PORT, !Network.HavePublicAddress());
-		Instantiate(playerManager);
 	}
 
 

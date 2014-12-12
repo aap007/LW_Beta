@@ -53,7 +53,6 @@ public class Tower : MonoBehaviour {
 				
 				// Smoothly rotate towards the target point.
 				transform.FindChild("Top").rotation = Quaternion.Slerp(transform.FindChild("Top").rotation, targetRotation, turnSpeed * Time.deltaTime);
-				
 			}	
 		}
 	}

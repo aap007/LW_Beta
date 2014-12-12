@@ -88,6 +88,7 @@ GameObject:
   - 81: {fileID: 873623525}
   - 114: {fileID: 873623531}
   - 148: {fileID: 873623530}
+  - 114: {fileID: 873623532}
   m_Layer: 0
   m_Name: Server
   m_TagString: MainCamera
@@ -183,6 +184,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 054a673f01ce7e74aa4138ca4e389c3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerManager: {fileID: 11400000, guid: c319cb3bc58694349b6fa03a37ed721e, type: 2}
   widthPercent: .300000012
   heightPercent: .300000012
+--- !u!114 &873623532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 873623524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7523012686342b74ba73df6ddd31fdcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerPrefab: {fileID: 11400000, guid: 223cdbf52243f0c408ee33da9246fe41, type: 2}
+  gameFieldPrefab: {fileID: 11400256, guid: 47261294b2994a04993c0c6ac4fcd363, type: 2}

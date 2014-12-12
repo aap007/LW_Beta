@@ -25,7 +25,6 @@ public class PlayerManager : MonoBehaviour {
 	// EVENTS
 	void Awake() {
 		playerTracker = new List<C_PlayerManager>();
-		Debug.Log("Playermanager created");
 	}
 	void Update () {
 		if (Network.isClient) {
@@ -36,14 +35,14 @@ public class PlayerManager : MonoBehaviour {
 
 	// FUNCTIONS
 	public void SpawnPlayer(NetworkPlayer player) {
-		//C_PlayerManager client = (C_PlayerManager)Network.Instantiate(playerPrefab, transform.position, Quaternion.identity, (int)NetworkGroup.PLAYER);
-		//playerTracker.Add(client);
-		//NetworkView clientNetView = GetPlayerNetworkView(client);
-		//clientNetView.RPC("SetOwner", RPCMode.All, player);
+		C_PlayerManager client = (C_PlayerManager)Network.Instantiate(playerPrefab, transform.position, Quaternion.identity, (int)NetworkGroup.PLAYER);
+		playerTracker.Add(client);
+		NetworkView clientNetView = GetPlayerNetworkView(client);
+		clientNetView.RPC("SetOwner", RPCMode.All, player);
 		
-		//Debug.Log ("Spawning field on server at X-coordinate: " + (25 * GetPlayerCount ()));
-		//GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(GAMEFIELD_OFFSET*GetPlayerCount(), 0, 0), Quaternion.identity, (int)NetworkGroup.PLAYER);
-		//clientNetView.RPC("SetGameField", RPCMode.All, gameField);
+		Debug.Log ("Spawning field on server at X-coordinate: " + (25 * (GetPlayerCount()-1)));
+		GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(GAMEFIELD_OFFSET*(GetPlayerCount()-1), 0, 0), Quaternion.identity, (int)NetworkGroup.PLAYER);
+		clientNetView.RPC("SetCameraTarget", RPCMode.All, gameField.transform.position);
 	}
 	public void RemovePlayer(NetworkPlayer player) {
 		// TODO

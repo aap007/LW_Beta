@@ -20,12 +20,12 @@ public class GameField : MonoBehaviour {
 		endPoint = transform.FindChild("EndPoint");
 	}
 	void Update () {
-		timeLeft -= Time.deltaTime;
+		/*timeLeft -= Time.deltaTime;
 		if (timeLeft <= 0.0f) {
 			Enemy enemy = (Enemy)Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity);
 			enemy.SetDestination(endPoint.position);			
 			timeLeft = interval;
-		}
+		}*/
 		
 		// XXX: Is this efficient? Better let objects check themselves if they collide with endPoint.
 		Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
