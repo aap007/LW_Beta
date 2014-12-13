@@ -1,18 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class C_PlayerManager : MonoBehaviour {
+public class Player : MonoBehaviour {
 
 	// That's actually not the owner but the player,
 	// the server instantiated the prefab for, where this script is attached
-	private NetworkPlayer owner;
+	public NetworkPlayer owner;
 	
-	// Properties of a client. Made private because they
-	// can only be changed by RPC functies call by the server.
-	private string name;
-	private int life;
-	private int gold;
+	// Properties of a player.
+	public string name;
+	public int life;
+	public int gold;
 
+	// Reference to PlayerManager for server
+	private PlayerManager playerManager; 
 
 	void Awake() {
 		// Disable this by default for now
@@ -21,14 +22,14 @@ public class C_PlayerManager : MonoBehaviour {
 		if (Network.isClient) {
 			enabled = false;
 		}
-	}
-	void Update() {
-		if (Network.isServer) {
-			return; // Get lost, this is the client side
+		else if(Network.isServer){
+			playerManager = (PlayerManager)GameObject.Find("Server").GetComponent<PlayerManager>();
+			Debug.Log(playerManager);
 		}
 	}
 
 
+	// Called from server on clients
 	[RPC]
 	void SetOwner(NetworkPlayer p) {
 		owner = p;
@@ -52,8 +53,6 @@ public class C_PlayerManager : MonoBehaviour {
 			}
 		}
 	}
-	
-	// Called from server with coordinates of the game field.
 	[RPC]
 	void SetCameraTarget(Vector3 v) {
 		if (Network.isServer) {
@@ -64,5 +63,43 @@ public class C_PlayerManager : MonoBehaviour {
 			camera.transform.position = v;
 			camera.transform.Rotate(45, 0, 0);
 		}
-	}	
+	}
+	[RPC]
+	void SetLife(int amount) {
+		life = amount;
+	}
+	[RPC]
+	void SetGold(int amount) {
+		gold = amount;
+	}
+	
+	
+	// Called from client on server
+	[RPC]
+	void SpawnEnemy() {
+		if (Network.isServer) {
+			GameField nextGameField = playerManager.GetNextGamefield(this);
+			
+			if(nextGameField != null){
+				nextGameField.SpawnEnemy();
+			}
+			else{
+				Debug.Log("ERROR: No next player");
+			}
+		}
+	}
+	
+	
+	void OnGUI() {
+		if (Network.isServer) {
+			return; // Get lost, this is the client side
+		}
+			
+		GUI.Label(new Rect(0, 0, 400, 200), "Life: " + life);	
+		GUI.Label(new Rect(0, 10, 400, 200), "Gold: " + gold);
+		
+		if (GUI.Button (new Rect(200, 20, 200, 100), "Spawn creep O_O")){
+			networkView.RPC("SpawnEnemy", RPCMode.Server);
+		}
+	}
 }

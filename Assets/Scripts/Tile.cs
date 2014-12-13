@@ -3,32 +3,24 @@ using System.Collections;
 
 public class Tile : MonoBehaviour {
 
-	// Settings
-	public Tower towerPrefab = null;
-	
 	// Privates
-	private Tower tower = null;
-	private bool isBuild = false;
-
+	private int id;
+	
+	
+	// FUNCTIONS
+	public void SetId (int identifier) {
+		id = identifier;
+	}
+	
+	public int GetId () {
+		return id;
+	}
+	
 
 	// EVENTS
 	void OnMouseDown() {
-		if (!isBuild) {
-			tower = (Tower)Instantiate (towerPrefab, transform.position, Quaternion.identity);
-			
-			// Trigger A* pathfinding route update
-			GameObject graphUpdater = GameObject.Find ("GraphUpdater");
-			graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
-			// Iterate through all units and update their current route
-			Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
-			// TODO: this is ugly code, please fix
-			for (int i = 0; i < enemies.Length; ++i) {
-				enemies[i].SetDestination(enemies[i].vDestination);
-			}
+		if (Network.isClient) {
+			transform.parent.gameObject.networkView.RPC("BuildTower", RPCMode.Server, id, "TowerPrefab");
 		}
-		else {
-			Destroy(tower.gameObject);
-		}
-		isBuild = !isBuild;
 	}
 }

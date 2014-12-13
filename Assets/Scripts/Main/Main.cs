@@ -7,6 +7,10 @@ public class Main : MonoBehaviour {
 	public float widthPercent = 0.3f;
 	public float heightPercent = 0.3f;
 
+	void OnStart() {
+		Screen.SetResolution(360, 640, false);
+	}
+
 	// TODO: remove this deprecated GUI, use Canvas object instead
 	void OnGUI() {
 		Rect r = new Rect(Screen.width * (1 - widthPercent) / 2,

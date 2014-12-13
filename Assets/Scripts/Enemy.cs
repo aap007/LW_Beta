@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour {
 	// Settings
 	public int health = 5;
 	public int speed = 25;
+	public int price = 1;
 
 	
 	public Vector3 vDestination;
@@ -13,12 +14,6 @@ public class Enemy : MonoBehaviour {
 	
 	// EVENTS
 	void Update () {
-		//TextMesh tm = GetComponentInChildren<TextMesh>();
-		//tm.text = new string('-', health);
-		//tm.renderer.material.color = Color.red;
-
-		// adjust health bar so it always faces the camera
-		//tm.transform.forward = Camera.main.transform.forward;
 	}
 
 
@@ -31,7 +26,6 @@ public class Enemy : MonoBehaviour {
 	public void TakeDamage(int damage) {
 		health -= damage;
 		if (health <= 0) {
-			Debug.Log("Destroying enemy");
 			Destroy(gameObject);
 		}
 	}
