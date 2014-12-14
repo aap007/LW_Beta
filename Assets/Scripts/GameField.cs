@@ -61,19 +61,24 @@ public class GameField : MonoBehaviour {
 				}
 			}
 		}
-		Debug.Log("startX: "+startX);
-		Debug.Log("endX: "+endX);
-		Debug.Log("startZ: "+startZ);
-		Debug.Log("endZ: "+endZ);
 		
 		// Create a GridGraph with the same dimensions as this gamefield
 		// Be sure to position it BELOW the gamefield (required for A* pathfinding)
 		AstarData data = AstarPath.active.astarData;
 		GridGraph gg = data.AddGraph(typeof(GridGraph)) as GridGraph;
-		gg.width = 16;
-		gg.depth = 32;
+		gg.width = 17;
+		gg.depth = 33;
 		gg.nodeSize = 0.5f;
+		// Below settings are for collision detection
 		gg.cutCorners = false;
+		gg.erodeIterations = 0;
+		gg.collision.type = ColliderType.Capsule;
+		gg.collision.diameter = 1;
+		gg.collision.height = 2;
+		gg.collision.mask = 0;
+		gg.collision.mask |= (1 << LayerMask.NameToLayer("Obstacles"));
+		gg.collision.heightMask = 0;
+		gg.collision.heightMask |= (1 << LayerMask.NameToLayer("Ground"));
 		gg.center = new Vector3 ((endX - startX) / 2 + transform.position.x,-1, (endZ - startZ) / 2 + transform.position.z);
 		// Updates internal size from the above values
 		gg.UpdateSizeFromWidthDepth();

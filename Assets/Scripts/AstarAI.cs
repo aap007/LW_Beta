@@ -19,7 +19,7 @@ public class AstarAI : MonoBehaviour {
 	public float speed = 100;
 	
 	//The max distance from the AI to a waypoint for it to continue to the next waypoint
-	public float nextWaypointDistance = 3;
+	public float nextWaypointDistance = 1f;
 	
 	//The waypoint we are currently moving towards
 	private int currentWaypoint = 0;
@@ -67,7 +67,10 @@ public class AstarAI : MonoBehaviour {
 		
 		//Check if we are close enough to the next waypoint
 		//If we are, proceed to follow the next waypoint
-		if (Vector3.Distance (transform.position,path.vectorPath[currentWaypoint]) < nextWaypointDistance) {
+		// Removed the y axis for more precise smooting (we don't use the y-axis in pathfinding anyway) 
+		Vector3 distance = transform.position - path.vectorPath[currentWaypoint];
+		distance.y = 0;
+		if (distance.magnitude < nextWaypointDistance) {
 			currentWaypoint++;
 			return;
 		}
