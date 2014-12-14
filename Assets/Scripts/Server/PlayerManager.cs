@@ -38,7 +38,16 @@ public class PlayerManager : MonoBehaviour {
 
 
 	// FUNCTIONS
-	
+
+	// Find the player belonging to a certain gamefield
+	public static Player GetPlayer(GameField g) {
+		foreach (PlayerInfo playerInfo in playerInfoTracker) {
+			if (playerInfo.gameField == g) {
+				return playerInfo.player;
+			}
+		}
+		return null;
+	}	
 	// Use the function to get player information for the current player.
 	// This will ONLY work when called on the SERVER using the
 	// Network.player from the CLIENT as argument for this function.

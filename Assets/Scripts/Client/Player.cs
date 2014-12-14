@@ -8,7 +8,6 @@ public class Player : MonoBehaviour {
 	public NetworkPlayer owner;
 	
 	// Properties of a player.
-	public string name;
 	public int life;
 	public int gold;
 

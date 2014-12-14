@@ -3,16 +3,17 @@ using System.Collections;
 using Pathfinding;
 
 public class GameField : MonoBehaviour {
-	// TODO: use playermanager to resolve player
-	public Player player;
 
 	// Settings
 	public Enemy enemyPrefab = null;
 	public float interval = 3.0f;
 
+	// References - resolved at runtime
+	private Player player = null;
+
 	// Privates
 	private float timeLeft = 0.0f;
-	
+
 	private Transform spawnPoint;
 	private Transform endPoint;
 	
@@ -84,11 +85,15 @@ public class GameField : MonoBehaviour {
 		gg.UpdateSizeFromWidthDepth();
 		// Scans all graphs, do not call gg.Scan(), that is an internal method
 		AstarPath.active.Scan();
-		
 	}
 	void Update () {
 		if (Network.isClient) {
 			return;
+		}
+		
+		// Resolve player belonging to this gamefield once at runtime
+		if (player == null) {
+			player = PlayerManager.GetPlayer(this);
 		}
 	
 		timeLeft -= Time.deltaTime;
@@ -154,7 +159,7 @@ public class GameField : MonoBehaviour {
 				player.networkView.RPC ("SetGold", RPCMode.All, player.gold);
 
 				// Instantiate the tower on all clients
-				Tower t = (Tower)Network.Instantiate(towerPrefab, tile.transform.position, tile.transform.rotation, 0);
+				Network.Instantiate(towerPrefab, tile.transform.position, tile.transform.rotation, 0);
 				tile.enabled = false;
 				
 				// Update pathfinding to include the tower we just made

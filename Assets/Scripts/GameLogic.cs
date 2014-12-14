@@ -6,23 +6,17 @@ using System.Collections.Generic;
 // It only exists on the server
 public class GameLogic : MonoBehaviour {
 
-	// Privates
-	private PlayerManager playerManager = null;
-	
 	// Constants
 	private const int GOLD_PER_SEC = 1;
 	private const int STARTING_GOLD = 100;
 	private const int STARTING_LIFE = 20;
 	
+	// Privates
 	private float interval = 5.0f;
 	private float timeLeft = 0.0f;
 	
 	// EVENTS
-	void OnAwake () {
-		// Get reference to PlayerManager, which we need for gameplay.
-		playerManager = (PlayerManager)GameObject.Find("Server").GetComponent<PlayerManager>();
-	}
-	void Update () {			
+	void Update() {
 		// TODO: Check for loser and victor
 		
 		timeLeft -= Time.deltaTime;
