@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 // This class implements the gameplay for a certain gametype
+// It only exists on the server
 public class GameLogic : MonoBehaviour {
 
 	// Privates
@@ -13,28 +14,27 @@ public class GameLogic : MonoBehaviour {
 	private const int STARTING_GOLD = 100;
 	private const int STARTING_LIFE = 20;
 	
+	private float interval = 5.0f;
+	private float timeLeft = 0.0f;
 	
 	// EVENTS
-	void OnCreate () {
+	void OnAwake () {
 		// Get reference to PlayerManager, which we need for gameplay.
-		//playerManager = FindObjectOfType(PlayerManager);
+		playerManager = (PlayerManager)GameObject.Find("Server").GetComponent<PlayerManager>();
 	}
-	void Update () {
-		// XXX: is this check necessary?
-		if (Network.isClient)
-			return;
-			
+	void Update () {			
 		// TODO: Check for loser and victor
 		
-		// TODO: Supply all players with gold
-		//List<C_PlayerManager> playerList = playerManager.GetPlayers();
-		//foreach (C_PlayerManager player in playerList) {
-			// Okay, so the C_PlayerManager object exists on both client and server
-			// So what is the difference between increasing gold directly on the object
-			// or callling the RPC function on the class? 
-			//player.IncreaseGold(1);
-			//NetworkView net = (NetworkView)player.GetComponent<NetworkView>();
-			//net.RPC("SetGold", RPCMode.All, 100);
-		//}
+		timeLeft -= Time.deltaTime;
+		if (timeLeft <= 0.0f) {
+			// Supply all players with gold
+			Player[] playerList = FindObjectsOfType<Player>();
+			foreach (Player player in playerList) {
+			  player.gold += 1;
+			  player.networkView.RPC ("SetGold", RPCMode.All, player.gold);
+			}
+			
+			timeLeft = interval;
+		}
 	}
 }

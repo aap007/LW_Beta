@@ -11,11 +11,6 @@ public class Enemy : MonoBehaviour {
 	
 	public Vector3 vDestination;
 
-	
-	// EVENTS
-	void Update () {
-	}
-
 
 	// FUNCTIONS
 	public void SetDestination(Vector3 destination) {

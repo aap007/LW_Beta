@@ -3,23 +3,15 @@ using System.Collections;
 
 public class Tile : MonoBehaviour {
 
-	// Privates
-	private int id;
-	
-	
-	// FUNCTIONS
-	public void SetId (int identifier) {
-		id = identifier;
-	}
-	
-	public int GetId () {
-		return id;
-	}
+	// Unique ID for each tile in a gamefield
+	[HideInInspector]
+	public int id;
 	
 
 	// EVENTS
 	void OnMouseDown() {
 		if (Network.isClient) {
+			// TODO: this also works for gamefields not owned by this player!
 			transform.parent.gameObject.networkView.RPC("BuildTower", RPCMode.Server, id, "TowerPrefab");
 		}
 	}

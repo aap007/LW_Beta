@@ -7,9 +7,9 @@ public class Projectile : MonoBehaviour {
 	public float speed = 10.0f;
 	public int damage = 1;
 	
-	// Privates
 	// Destination set by Tower when creating the bullet
-	private Transform destination;
+	[HideInInspector]
+	public Transform destination;
 	
 	
 	// EVENTS
@@ -33,10 +33,5 @@ public class Projectile : MonoBehaviour {
 			// Destroy bullet
 			Destroy(gameObject);
 		}
-	}
-	
-	// FUNCTIONS
-	public void SetDestination(Transform v) {
-		destination = v;
 	}
 }

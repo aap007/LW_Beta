@@ -33,7 +33,7 @@ public class Tower : MonoBehaviour {
 					Projectile b = g.GetComponent<Projectile> ();
 					b.damage = bulletDamage;
 					// TODO: this always homes to target
-					b.SetDestination (target.transform);
+					b.destination = target.transform;
 					
 					timeLeft = interval;
 				}

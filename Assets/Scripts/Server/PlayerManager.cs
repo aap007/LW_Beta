@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+// This class resides only on server-side and keeps track
+// of all players connected to the server.
 [RequireComponent(typeof(NetworkView))]
 public class PlayerManager : MonoBehaviour {
 
@@ -12,47 +14,63 @@ public class PlayerManager : MonoBehaviour {
 	// Constants
 	private const int GAMEFIELD_OFFSET = 15;
 	
-	// Privates
-	class PlayerInfo {
+	// Publics
+	public class PlayerInfo {
+		// This is the network player on the CLIENT
+		public NetworkPlayer networkPlayer;
+	
 		public Player player;
 		public GameField gameField;
 		
-		public PlayerInfo(Player p, GameField g){
+		public PlayerInfo(NetworkPlayer np, Player p, GameField g) {
+			networkPlayer = np;
 			player = p;
 			gameField = g;
 		}
 	}
-	
-	private List<PlayerInfo> playerInfoTracker;
+	public static List<PlayerInfo> playerInfoTracker;
+
 
 	// EVENTS
 	void Awake() {
 		playerInfoTracker = new List<PlayerInfo>();
 	}
-	void Update () {
-		if (Network.isClient) {
-			return; //Get lost, this is the server-side!
-		}
-	}
 
 
 	// FUNCTIONS
+	
+	// Use the function to get player information for the current player.
+	// This will ONLY work when called on the SERVER using the
+	// Network.player from the CLIENT as argument for this function.
+	// To get the client Network.player use NetworkMessageInfo.sender
+	// from the RPC call from client to server.
+	public static PlayerInfo GetPlayerInfo(NetworkPlayer p) {
+		foreach (PlayerInfo playerInfo in playerInfoTracker) {
+			if (playerInfo.networkPlayer == p) {
+				return playerInfo;
+			}
+		}
+		return null;
+	}
+	
 	public void SpawnPlayer(NetworkPlayer networkPlayer) {
+		// Position the camera of the player at a birds-eye view of the gamefield
 		Vector3 playerPos = new Vector3(GAMEFIELD_OFFSET*GetPlayerCount(), 0, 0);
 		playerPos.x += 4;
-		playerPos.y += 13;
-		playerPos.z -= 5.5f;
+		playerPos.y += 10;
+		playerPos.z -= 4;
 		
+		// Create a player and a gamefield
+		// For each player that joins, a gamefield is created with an offset on the X-axis
 		Player player = (Player)Network.Instantiate(playerPrefab, playerPos, playerPrefab.transform.rotation, 0);
 		GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(GAMEFIELD_OFFSET*GetPlayerCount(), 0, 0), Quaternion.identity, 0);
 		
-		playerInfoTracker.Add(new PlayerInfo(player, gameField));
+		// Link player to gamefield, but only on the server; client doesn't need to know
+		playerInfoTracker.Add(new PlayerInfo(networkPlayer, player, gameField));
+		
+		// Set the owner (=owning client) for the created player
 		NetworkView clientNetView = GetPlayerNetworkView(player);
 		clientNetView.RPC("SetOwner", RPCMode.All, networkPlayer);
-		
-		// Link player to gamefield, but only on the server; client doesn't need to know
-		gameField.player = player;
-		
 	}
 	public void RemovePlayer(NetworkPlayer player) {
 		// TODO

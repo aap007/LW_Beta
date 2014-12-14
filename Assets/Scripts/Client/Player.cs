@@ -24,7 +24,6 @@ public class Player : MonoBehaviour {
 		}
 		else if(Network.isServer){
 			playerManager = (PlayerManager)GameObject.Find("Server").GetComponent<PlayerManager>();
-			Debug.Log(playerManager);
 		}
 	}
 

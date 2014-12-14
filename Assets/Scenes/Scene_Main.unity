@@ -254,7 +254,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 11400000, guid: 223cdbf52243f0c408ee33da9246fe41, type: 2}
-  gameFieldPrefab: {fileID: 11400256, guid: 47261294b2994a04993c0c6ac4fcd363, type: 2}
+  gameFieldPrefab: {fileID: 0}
 --- !u!148 &2021925796
 NetworkView:
   m_ObjectHideFlags: 1

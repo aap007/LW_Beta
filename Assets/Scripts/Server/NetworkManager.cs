@@ -5,13 +5,8 @@ using System.Collections.Generic;
 [RequireComponent(typeof(NetworkView))]
 public class NetworkManager : MonoBehaviour {
 
-	// Private stuff
+	// Privates
 	private PlayerManager playerManager;
-	private enum NetworkGroup {
-		DEFAULT = 0,
-		PLAYER  = 1,
-		SERVER  = 2
-	};
 
 	// TEMP GUI stuff
 	public float widthPercent = 0.3f;

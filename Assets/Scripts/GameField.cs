@@ -22,7 +22,9 @@ public class GameField : MonoBehaviour {
 		spawnPoint = transform.FindChild("SpawnPoint");
 		endPoint = transform.FindChild("EndPoint");
 		
-		
+		// These variables hold the relative position of the
+		// lower left and upper right corners of this gamefield.
+		// This is used to create a GridGraph for pathfinding.
 		float startX = 0f;
 		float startZ = 0f;
 		float endX = 0f;
@@ -30,12 +32,10 @@ public class GameField : MonoBehaviour {
 		float radiusX = 1f;
 		float radiusZ = 1f;
 		
-		// Give the Tiles there own identifier
+		// Give the tiles an identifier (0-based)
 		Tile[] tiles = gameObject.GetComponentsInChildren<Tile>();
 		for(int i = 0; i < tiles.Length; i++) {
-			tiles[i].SetId(i);
-			
-			
+			tiles[i].id = i;
 			
 			if(i==0){
 				radiusX = tiles[i].GetComponent<MeshFilter>().mesh.bounds.size.x / 2;
@@ -66,11 +66,10 @@ public class GameField : MonoBehaviour {
 		Debug.Log("startZ: "+startZ);
 		Debug.Log("endZ: "+endZ);
 		
-		// This holds all graph data
+		// Create a GridGraph with the same dimensions as this gamefield
+		// Be sure to position it BELOW the gamefield (required for A* pathfinding)
 		AstarData data = AstarPath.active.astarData;
-		// This creates a Grid Graph
 		GridGraph gg = data.AddGraph(typeof(GridGraph)) as GridGraph;
-		// Setup a grid graph with some values
 		gg.width = 16;
 		gg.depth = 32;
 		gg.nodeSize = 0.5f;
@@ -105,13 +104,14 @@ public class GameField : MonoBehaviour {
 			}
 		}
 	}
+
+		
+	
+	// FUNCTIONS
 	public void SpawnEnemy() {
 		Enemy enemy = (Enemy)Network.Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity, 0);
 		enemy.SetDestination(endPoint.position);	
 	}
-		
-	
-	// FUNCTIONS
 	public Vector3 GetEndpoint() {
 		return endPoint.position;
 	}
@@ -119,16 +119,23 @@ public class GameField : MonoBehaviour {
 	
 	// Called from client on server
 	[RPC]
-	void BuildTower(int id, string towerType) {
+	void BuildTower(int id, string towerType, NetworkMessageInfo senderInfo) {
 		if (Network.isClient) { // TODO: is this required?
 			return;		
 		}
 		
+		// Get player that owns this gamefield
+		PlayerManager.PlayerInfo info = PlayerManager.GetPlayerInfo(senderInfo.sender);
+		if (info == null) {
+			Debug.Log ("Error resolving playerinfo!");
+			return;
+		}
+		Player player = info.player;
+		
 		Tile[] tiles = gameObject.GetComponentsInChildren<Tile>();
 		foreach(Tile tile in tiles) {
-			if (tile.GetId() == id) {
+			if (tile.id == id) {
 				// TODO: check if tile is available?? (should be disabled otherwise)
-				
 				
 				// Load tower prefab
 				Tower towerPrefab = Resources.Load<Tower>(towerType);
@@ -154,15 +161,6 @@ public class GameField : MonoBehaviour {
 				foreach (Enemy enemy in enemies) {
 					enemy.SetDestination(enemy.vDestination);
 				}
-				/* // Trigger A* pathfinding route update
-			GameObject graphUpdater = GameObject.Find ("GraphUpdater");
-			graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
-			// Iterate through all units and update their current route
-			Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
-			// TODO: this is ugly code, please fix
-			for (int i = 0; i < enemies.Length; ++i) {
-				enemies[i].SetDestination(enemies[i].vDestination);
-			}*/
 			}
 		}		
 	}
