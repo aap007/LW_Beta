@@ -11,7 +11,8 @@ public class Tile : MonoBehaviour {
 	// EVENTS
 	void OnMouseDown() {
 		if (Network.isClient) {
-			// TODO: this also works for gamefields not owned by this player!
+			// Ask the server to build us a tower. The server will check if this player also
+			// owns the gamefield for which a tower is requested.
 			transform.parent.gameObject.networkView.RPC("BuildTower", RPCMode.Server, id, "TowerPrefab");
 		}
 	}

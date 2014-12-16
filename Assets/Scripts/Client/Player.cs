@@ -15,9 +15,8 @@ public class Player : MonoBehaviour {
 	private PlayerManager playerManager; 
 
 	void Awake() {
-		// Disable this by default for now
-		// Just to make sure no one can use this until we didn't
-		// find the right player. (see setOwner())
+		// Disable this by default for now. Just to make sure no one can use 
+		// this until we didn't find the right player. (see setOwner())
 		if (Network.isClient) {
 			enabled = false;
 		}
@@ -61,14 +60,6 @@ public class Player : MonoBehaviour {
 			camera.transform.position = v;
 			camera.transform.Rotate(45, 0, 0);
 		}
-	}
-	[RPC]
-	void SetLife(int amount) {
-		life = amount;
-	}
-	[RPC]
-	void SetGold(int amount) {
-		gold = amount;
 	}
 	
 	

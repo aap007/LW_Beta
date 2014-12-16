@@ -134,10 +134,14 @@ public class GameField : MonoBehaviour {
 			return;		
 		}
 		
-		// Get player that owns this gamefield
+		// Check that this player actually owns the gamefield
 		PlayerManager.PlayerInfo info = PlayerManager.GetPlayerInfo(senderInfo.sender);
 		if (info == null) {
 			Debug.Log ("Error resolving playerinfo!");
+			return;
+		}
+		if (info.gameField != this) {
+			Debug.Log ("This player does not own the gamefield!");
 			return;
 		}
 		Player player = info.player;
@@ -163,8 +167,7 @@ public class GameField : MonoBehaviour {
 				tile.enabled = false;
 				
 				// Update pathfinding to include the tower we just made
-				// TODO: should be done on all clients!
-				GameObject graphUpdater = GameObject.Find ("GraphUpdater");
+				GameObject graphUpdater = transform.Find("GraphUpdater").gameObject;
 				graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
 				// Iterate through all units and update their current route
 				Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));

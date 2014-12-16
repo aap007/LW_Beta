@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Enemy : MonoBehaviour {
 
+
+	
 	// Settings
 	public int health = 5;
 	public int speed = 25;

@@ -7,7 +7,7 @@ public class Main : MonoBehaviour {
 	public float widthPercent = 0.3f;
 	public float heightPercent = 0.3f;
 
-	void OnStart() {
+	void Start() {
 		Screen.SetResolution(360, 640, false);
 	}
 

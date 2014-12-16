@@ -19,7 +19,9 @@ public class PlayerManager : MonoBehaviour {
 		// This is the network player on the CLIENT
 		public NetworkPlayer networkPlayer;
 	
+		// SERVER instance of a Player
 		public Player player;
+		// SERVER instance of a GameField
 		public GameField gameField;
 		
 		public PlayerInfo(NetworkPlayer np, Player p, GameField g) {
@@ -38,7 +40,7 @@ public class PlayerManager : MonoBehaviour {
 
 
 	// FUNCTIONS
-
+	
 	// Find the player belonging to a certain gamefield
 	public static Player GetPlayer(GameField g) {
 		foreach (PlayerInfo playerInfo in playerInfoTracker) {
@@ -47,8 +49,8 @@ public class PlayerManager : MonoBehaviour {
 			}
 		}
 		return null;
-	}	
-	// Use the function to get player information for the current player.
+	}
+	// Use this function to get player information for the current player.
 	// This will ONLY work when called on the SERVER using the
 	// Network.player from the CLIENT as argument for this function.
 	// To get the client Network.player use NetworkMessageInfo.sender
@@ -61,7 +63,15 @@ public class PlayerManager : MonoBehaviour {
 		}
 		return null;
 	}
-	
+	public static PlayerInfo GetPlayerInfo(GameField g) {
+		foreach (PlayerInfo playerInfo in playerInfoTracker) {
+			if (playerInfo.gameField == g) {
+				return playerInfo;
+			}
+		}
+		return null;
+	}
+		
 	public void SpawnPlayer(NetworkPlayer networkPlayer) {
 		// Position the camera of the player at a birds-eye view of the gamefield
 		Vector3 playerPos = new Vector3(GAMEFIELD_OFFSET*GetPlayerCount(), 0, 0);
