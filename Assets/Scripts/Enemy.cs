@@ -3,8 +3,6 @@ using System.Collections;
 
 public class Enemy : MonoBehaviour {
 
-
-	
 	// Settings
 	public int health = 5;
 	public int speed = 25;
@@ -23,7 +21,7 @@ public class Enemy : MonoBehaviour {
 	public void TakeDamage(int damage) {
 		health -= damage;
 		if (health <= 0) {
-			Destroy(gameObject);
+			Network.Destroy(gameObject);
 		}
 	}
 }

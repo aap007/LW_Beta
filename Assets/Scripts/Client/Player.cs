@@ -61,6 +61,14 @@ public class Player : MonoBehaviour {
 			camera.transform.Rotate(45, 0, 0);
 		}
 	}
+	[RPC]
+	void SetLife(int amount) {
+		life = amount;
+	}
+	[RPC]
+	void SetGold(int amount) {
+		gold = amount;
+	}
 	
 	
 	// Called from client on server

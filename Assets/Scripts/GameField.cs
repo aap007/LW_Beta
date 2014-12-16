@@ -6,14 +6,9 @@ public class GameField : MonoBehaviour {
 
 	// Settings
 	public Enemy enemyPrefab = null;
-	public float interval = 3.0f;
 
 	// References - resolved at runtime
 	private Player player = null;
-
-	// Privates
-	private float timeLeft = 0.0f;
-
 	private Transform spawnPoint;
 	private Transform endPoint;
 	
@@ -65,26 +60,29 @@ public class GameField : MonoBehaviour {
 		
 		// Create a GridGraph with the same dimensions as this gamefield
 		// Be sure to position it BELOW the gamefield (required for A* pathfinding)
-		AstarData data = AstarPath.active.astarData;
-		GridGraph gg = data.AddGraph(typeof(GridGraph)) as GridGraph;
-		gg.width = 17;
-		gg.depth = 33;
-		gg.nodeSize = 0.5f;
-		// Below settings are for collision detection
-		gg.cutCorners = false;
-		gg.erodeIterations = 0;
-		gg.collision.type = ColliderType.Capsule;
-		gg.collision.diameter = 1;
-		gg.collision.height = 2;
-		gg.collision.mask = 0;
-		gg.collision.mask |= (1 << LayerMask.NameToLayer("Obstacles"));
-		gg.collision.heightMask = 0;
-		gg.collision.heightMask |= (1 << LayerMask.NameToLayer("Ground"));
-		gg.center = new Vector3 ((endX - startX) / 2 + transform.position.x,-1, (endZ - startZ) / 2 + transform.position.z);
-		// Updates internal size from the above values
-		gg.UpdateSizeFromWidthDepth();
-		// Scans all graphs, do not call gg.Scan(), that is an internal method
-		AstarPath.active.Scan();
+		// Only the server has the A* pathfinding gameobject
+		if (Network.isServer) {
+			AstarData data = AstarPath.active.astarData;
+			GridGraph gg = data.AddGraph(typeof(GridGraph)) as GridGraph;
+			gg.width = 17;
+			gg.depth = 33;
+			gg.nodeSize = 0.5f;
+			// Below settings are for collision detection
+			gg.cutCorners = false;
+			gg.erodeIterations = 0;
+			gg.collision.type = ColliderType.Capsule;
+			gg.collision.diameter = 1;
+			gg.collision.height = 2;
+			gg.collision.mask = 0;
+			gg.collision.mask |= (1 << LayerMask.NameToLayer("Obstacles"));
+			gg.collision.heightMask = 0;
+			gg.collision.heightMask |= (1 << LayerMask.NameToLayer("Ground"));
+			gg.center = new Vector3 ((endX - startX) / 2 + transform.position.x,-1, (endZ - startZ) / 2 + transform.position.z);
+			// Updates internal size from the above values
+			gg.UpdateSizeFromWidthDepth();
+			// Scans all graphs, do not call gg.Scan(), that is an internal method
+			AstarPath.active.Scan();
+		}
 	}
 	void Update () {
 		if (Network.isClient) {
@@ -94,12 +92,6 @@ public class GameField : MonoBehaviour {
 		// Resolve player belonging to this gamefield once at runtime
 		if (player == null) {
 			player = PlayerManager.GetPlayer(this);
-		}
-	
-		timeLeft -= Time.deltaTime;
-		if (timeLeft <= 0.0f) {
-			//SpawnEnemy();
-			timeLeft = interval;
 		}
 		
 		// XXX: Is this efficient? Better let objects check themselves if they collide with endPoint.
@@ -160,10 +152,14 @@ public class GameField : MonoBehaviour {
 					return;
 				}
 				player.gold -= price;
-				player.networkView.RPC ("SetGold", RPCMode.All, player.gold);
+				player.networkView.RPC ("SetGold", RPCMode.Others, player.gold);
 
 				// Instantiate the tower on all clients
-				Network.Instantiate(towerPrefab, tile.transform.position, tile.transform.rotation, 0);
+				Tower tower = (Tower)Network.Instantiate(towerPrefab, tile.transform.position, tile.transform.rotation, 0);
+				// Link the tower and the tile.
+				tile.tower = tower;
+				tower.tile = tile;
+				// Hide the tile.
 				tile.enabled = false;
 				
 				// Update pathfinding to include the tower we just made
@@ -176,6 +172,47 @@ public class GameField : MonoBehaviour {
 				}
 			}
 		}		
+	}
+	[RPC]
+	void SellTower(int tileId, NetworkMessageInfo senderInfo) {
+		if (Network.isClient) { // TODO: is this required?
+			return;		
+		}
+		
+		Debug.Log ("Selling towah");
+		
+		// Check that this player actually owns the gamefield
+		PlayerManager.PlayerInfo info = PlayerManager.GetPlayerInfo(senderInfo.sender);
+		if (info == null) {
+			Debug.Log ("Error resolving playerinfo!");
+			return;
+		}
+		if (info.gameField != this) {
+			Debug.Log ("This player does not own this gamefield!");
+			return;
+		}
+		
+		// Get the tower using the tileId
+		Tower tower = null;
+		Tile[] tiles = gameObject.GetComponentsInChildren<Tile>();
+		foreach (Tile tile in tiles) {
+			if (tile.id == tileId) {
+				if (tile.tower == null) {
+					Debug.Log ("The selected tower does not belong to a tile");
+					return;
+				}
+				tower = tile.tower;
+				break;
+			}
+		}
+		
+		// Give the player money back
+		Player player = info.player;
+		player.gold += tower.sellPrice;
+		player.networkView.RPC ("SetGold", RPCMode.Others, player.gold);
+		
+		// Now remove the tower on the server and all clients
+		Network.Destroy(tower.gameObject);
 	}
 }
 

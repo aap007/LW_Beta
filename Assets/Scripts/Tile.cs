@@ -7,6 +7,10 @@ public class Tile : MonoBehaviour {
 	[HideInInspector]
 	public int id;
 	
+	// Reference to the Tower that is built on this tile
+	[HideInInspector]
+	public Tower tower;
+	
 
 	// EVENTS
 	void OnMouseDown() {

@@ -13,6 +13,10 @@ public class Tower : MonoBehaviour {
 	public float turnSpeed = 4.0f;
 	
 	public int buildPrice = 1;
+	public int sellPrice = 1;
+	
+	[HideInInspector]
+	public Tile tile;
 	
 	// Privates
 	private float timeLeft = 0.0f;
@@ -21,6 +25,10 @@ public class Tower : MonoBehaviour {
 	
 	// EVENTS
 	void Update() {
+		if (Network.isClient) {
+			return;
+		}
+		
 		if (target == null) {
 			target = findClosestTarget();
 		}
@@ -29,11 +37,11 @@ public class Tower : MonoBehaviour {
 			if (timeLeft <= 0.0f) {		
 				// Target is within range, start firing
 				if (Vector3.Distance (transform.position, target.transform.position) <= range) {
-					GameObject g = (GameObject)Instantiate (bulletPrefab.gameObject, transform.position, Quaternion.identity);
-					Projectile b = g.GetComponent<Projectile> ();
-					b.damage = bulletDamage;
+					Projectile p = (Projectile)Network.Instantiate(bulletPrefab, transform.position, Quaternion.identity, 0);
+					//Projectile b = g.GetComponent<Projectile> ();
+					p.damage = bulletDamage;
 					// TODO: this always homes to target
-					b.destination = target.transform;
+					p.destination = target.transform;
 					
 					timeLeft = interval;
 				}
@@ -54,6 +62,19 @@ public class Tower : MonoBehaviour {
 				// Smoothly rotate towards the target point.
 				transform.FindChild("Top").rotation = Quaternion.Slerp(transform.FindChild("Top").rotation, targetRotation, turnSpeed * Time.deltaTime);
 			}	
+		}
+	}
+	void OnMouseDown() {
+		if (Network.isClient) {
+			// TODO: Ask the server to sell this tower, given the ID of the tile this tower is built on.
+			/*
+			GameField gameField = PlayerManager.GetGameField();
+			if (gameField == null) {
+				Debug.Log("Error resolving current GameField on client");
+				return;
+			}
+			gameField.networkView.RPC("SellTower", RPCMode.Server, tile.id);
+			*/
 		}
 	}
 	

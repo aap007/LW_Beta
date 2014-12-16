@@ -14,9 +14,13 @@ public class Projectile : MonoBehaviour {
 	
 	// EVENTS
 	void Update () {
+		if (Network.isClient) {
+			return;
+		}
+		
 		// Destroy bullet if destination does not exist anymore
 		if (destination == null) {
-			Destroy(gameObject);
+			Network.Destroy(gameObject);
 			return;
 		}
 		// Move towards the destination
@@ -30,8 +34,8 @@ public class Projectile : MonoBehaviour {
 			Enemy enemy = destination.GetComponent<Enemy>();
 			enemy.TakeDamage(damage);
 			
-			// Destroy bullet
-			Destroy(gameObject);
+			// Destroy this projectile
+			Network.Destroy(gameObject);
 		}
 	}
 }
