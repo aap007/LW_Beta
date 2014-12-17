@@ -6,18 +6,15 @@ public class GameField : MonoBehaviour {
 
 	// Settings
 	public Enemy enemyPrefab = null;
-
+	public GameObject[] spawnPoints;
+	public Transform endPoint;
+		
 	// References - resolved at runtime
 	private Player player = null;
-	private GameObject[] spawnPoints;
-	private Transform endPoint;
 	
 	
 	// EVENTS
-	void Start () {
-		spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoints");
-		endPoint = transform.FindChild("EndPoint");
-		
+	void Start () {	
 		// These variables hold the relative position of the
 		// lower left and upper right corners of this gamefield.
 		// This is used to create a GridGraph for pathfinding.
@@ -113,7 +110,7 @@ public class GameField : MonoBehaviour {
 	public void SpawnEnemy() {
 		// Spawn enemy at random spawnpoint and set destination
 		Enemy enemy = (Enemy)Network.Instantiate(enemyPrefab, spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position, Quaternion.identity, 0);
-		enemy.SetDestination(endPoint.position);	
+		enemy.SetDestination(endPoint.position);
 	}
 	public Vector3 GetEndpoint() {
 		return endPoint.position;

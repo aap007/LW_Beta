@@ -2578,7 +2578,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.79784203, y: -5.21976423, z: 5.30233479}
+  m_LocalPosition: {x: 5.73303366, y: -3.29418993, z: 4.0265646}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400262}
@@ -9367,6 +9367,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 11400000, guid: 1a03c15d6fba3d647b0b4cf223d50474, type: 2}
+  spawnPoints:
+  - {fileID: 173466}
+  - {fileID: 173468}
+  - {fileID: 173470}
+  - {fileID: 173472}
+  - {fileID: 100260}
+  - {fileID: 100842}
+  endPoint: {fileID: 400258}
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
