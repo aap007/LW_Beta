@@ -9,13 +9,13 @@ public class GameField : MonoBehaviour {
 
 	// References - resolved at runtime
 	private Player player = null;
-	private Transform spawnPoint;
+	private GameObject[] spawnPoints;
 	private Transform endPoint;
 	
 	
 	// EVENTS
 	void Start () {
-		spawnPoint = transform.FindChild("SpawnPoint");
+		spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoints");
 		endPoint = transform.FindChild("EndPoint");
 		
 		// These variables hold the relative position of the
@@ -64,14 +64,14 @@ public class GameField : MonoBehaviour {
 		if (Network.isServer) {
 			AstarData data = AstarPath.active.astarData;
 			GridGraph gg = data.AddGraph(typeof(GridGraph)) as GridGraph;
-			gg.width = 17;
-			gg.depth = 33;
-			gg.nodeSize = 0.5f;
+			gg.width = 8;
+			gg.depth = 16;
+			gg.nodeSize = 1;
 			// Below settings are for collision detection
 			gg.cutCorners = false;
 			gg.erodeIterations = 0;
 			gg.collision.type = ColliderType.Capsule;
-			gg.collision.diameter = 1;
+			gg.collision.diameter = 0;
 			gg.collision.height = 2;
 			gg.collision.mask = 0;
 			gg.collision.mask |= (1 << LayerMask.NameToLayer("Obstacles"));
@@ -111,7 +111,8 @@ public class GameField : MonoBehaviour {
 	
 	// FUNCTIONS
 	public void SpawnEnemy() {
-		Enemy enemy = (Enemy)Network.Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity, 0);
+		// Spawn enemy at random spawnpoint and set destination
+		Enemy enemy = (Enemy)Network.Instantiate(enemyPrefab, spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position, Quaternion.identity, 0);
 		enemy.SetDestination(endPoint.position);	
 	}
 	public Vector3 GetEndpoint() {
