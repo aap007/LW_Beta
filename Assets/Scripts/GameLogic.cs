@@ -24,7 +24,7 @@ public class GameLogic : MonoBehaviour {
 			// Supply all players with gold
 			Player[] playerList = FindObjectsOfType<Player>();
 			foreach (Player player in playerList) {
-			  player.gold += 1;
+			  player.gold += GOLD_PER_SEC;
 			  player.networkView.RPC ("SetGold", RPCMode.All, player.gold);
 			}
 			

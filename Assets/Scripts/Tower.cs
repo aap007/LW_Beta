@@ -24,12 +24,19 @@ public class Tower : MonoBehaviour {
 	// Privates
 	private float timeLeft = 0.0f;
 	private Enemy target = null;
+	private GameField gameField = null;
 
 	
 	// EVENTS
 	void Start() {
 		muzzleFlash.enabled = false;
 		muzzleLight.enabled = false;
+		
+		// Get Gamefield through following relation: GameField -> Tile -> Tower
+		gameField = transform.parent.parent.gameObject.GetComponent<GameField>();
+		if (gameField == null) {
+			Debug.Log ("Tower: error resolving gamefield");
+		}
 		
 		StartCoroutine(BuildEffect());	
 	}
@@ -97,20 +104,18 @@ public class Tower : MonoBehaviour {
 	
 	// HELPER FUNCTIONS
 	private Enemy findClosestTarget() {
-		Enemy closest = null;
-		Vector3 pos = transform.position;
-		Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
-		if ((enemies != null) && (enemies.Length > 0)) {
-			closest = enemies[0];
-			for (int i = 1; i < enemies.Length; ++i) {
-				float cur = Vector3.Distance(pos, enemies[i].transform.position);
+		lock(gameField.enemyList) {
+			Vector3 pos = transform.position;
+			Enemy closest = (gameField.enemyList.Count == 0 ? null : gameField.enemyList[0]);
+			foreach(Enemy enemy in gameField.enemyList) {
+				float cur = Vector3.Distance(pos, enemy.transform.position);
 				float old = Vector3.Distance(pos, closest.transform.position);
 				if (cur < old) {
-					closest = enemies[i];
+					closest = enemy;
 				}
 			}
+			return closest;
 		}
-		return closest;
 	}
 	
 	

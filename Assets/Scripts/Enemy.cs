@@ -13,6 +13,10 @@ public class Enemy : MonoBehaviour {
 	[HideInInspector]
 	public Player owner;
 	
+	// SERVER reference to the gamefield this enemy is on
+	[HideInInspector]
+	public GameField gameField;
+	
 	// Destination for pathfinding
 	[HideInInspector]
 	public Vector3 vDestination;
@@ -28,7 +32,7 @@ public class Enemy : MonoBehaviour {
 	public void TakeDamage(int damage) {
 		health -= damage;
 		if (health <= 0) {
-			Network.Destroy(gameObject);
+			gameField.RemoveEnemy(this);
 		}
 	}
 }

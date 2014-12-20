@@ -6,10 +6,18 @@ using Pathfinding;
 [RequireComponent(typeof(NetworkView))]
 public class GameField : MonoBehaviour {
 
+	// Privates
+	private float interval = 0.5f;
+	private float timeLeft = 0.0f;
+	
 	// Settings
 	public Enemy enemyPrefab = null;
 	public GameObject[] spawnPoints;
 	public Transform endPoint;
+	
+	// List with enemies currently on this gamefield
+	[HideInInspector]
+	public List<Enemy> enemyList;
 	
 	// References
 	[HideInInspector]
@@ -17,7 +25,7 @@ public class GameField : MonoBehaviour {
 	
 	
 	// EVENTS
-	void Start () {	
+	void Start () {
 		// These variables hold the relative position of the
 		// lower left and upper right corners of this gamefield.
 		// This is used to create a GridGraph for pathfinding.
@@ -58,10 +66,12 @@ public class GameField : MonoBehaviour {
 			}
 		}
 		
-		// Create a GridGraph with the same dimensions as this gamefield
-		// Be sure to position it BELOW the gamefield (required for A* pathfinding)
-		// Only the server has the A* pathfinding gameobject
 		if (Network.isServer) {
+			enemyList = new List<Enemy>();
+
+			// Create a GridGraph with the same dimensions as this gamefield
+			// Be sure to position it BELOW the gamefield (required for A* pathfinding)
+			// Only the server has the A* pathfinding gameobject			
 			AstarData data = AstarPath.active.astarData;
 			GridGraph gg = data.AddGraph(typeof(GridGraph)) as GridGraph;
 			gg.width = 8;
@@ -89,26 +99,29 @@ public class GameField : MonoBehaviour {
 			return;
 		}
 		
-		// XXX: Is this efficient? Better let objects check themselves if they collide with endPoint.
-		// TODO: this should also be done every 0.5 (or so) seconds, instead of every frame!
-		Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
-		float range = endPoint.collider.bounds.size.x / 4;
-		foreach (Enemy enemy in enemies) {
-			if (Vector3.Distance(endPoint.position, enemy.transform.position) <= range) {		
-				// This player has "leaked", so remove a life
-				// TODO: combine this in a single function which updates life on server + all clients
-				player.life -= 1;
-				player.networkView.RPC("SetLife", RPCMode.Others, player.life);
-				
-				Debug.Log ("Server GameField update, enemy.owner: " + enemy.owner);
-				// Add a life for the player that owned the enemy
-				Debug.Log ("Life before: " + enemy.owner.life);
-				enemy.owner.life += 1;
-				Debug.Log ("Life after: " + enemy.owner.life);
-				enemy.owner.networkView.RPC("SetLife", RPCMode.Others, enemy.owner.life);
-				
-				Network.Destroy(enemy.gameObject.networkView.viewID);
+		timeLeft -= Time.deltaTime;
+		if (timeLeft <= 0.0f) {
+			// XXX: Is this efficient? Better let objects check themselves if they collide with endPoint.
+			float range = endPoint.collider.bounds.size.x / 4;
+			// Make a copy of the enemy list, because we remove elements from it while looping
+			// TODO: can this be done more efficiently?
+			List<Enemy> tempEnemyList = new List<Enemy>(enemyList);
+			foreach (Enemy enemy in tempEnemyList) {
+				if (Vector3.Distance(endPoint.position, enemy.transform.position) <= range) {		
+					// This player has "leaked", so remove a life
+					// TODO: combine this in a single function which updates life on server + all clients
+					player.life -= 1;
+					player.networkView.RPC("SetLife", RPCMode.Others, player.life);
+					
+					// Add a life for the player that owned the enemy
+					enemy.owner.life += 1;
+					enemy.owner.networkView.RPC("SetLife", RPCMode.Others, enemy.owner.life);
+					
+					// Remove from server and all clients
+					RemoveEnemy(enemy);
+				}
 			}
+			timeLeft = interval;
 		}
 	}
 	
@@ -117,10 +130,18 @@ public class GameField : MonoBehaviour {
 	public void SpawnEnemy(Player originator) {
 		// Spawn enemy at random spawnpoint
 		Enemy enemy = (Enemy)Network.Instantiate(enemyPrefab, spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position, Quaternion.identity, 0);
-		// Update value on server
-		enemy.owner = originator; 
+		// Update values on server
+		enemy.owner = originator;
+		enemy.gameField = this;
+		enemyList.Add(enemy);
 		// Set endpoint for A* pathfinding of this enemy
 		enemy.SetDestination(endPoint.position);
+	}
+	public void RemoveEnemy(Enemy enemy) {
+		lock (enemyList) {
+			enemyList.Remove(enemy);
+			Network.Destroy(enemy.gameObject.networkView.viewID);
+		}
 	}
 }
 
