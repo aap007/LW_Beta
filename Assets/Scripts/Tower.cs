@@ -16,6 +16,11 @@ public class Tower : MonoBehaviour {
 	public int buildPrice = 1;
 	public int sellPrice = 1;
 	
+	public Renderer muzzleFlash;
+	public Light muzzleLight;
+	
+	public AudioClip firesound;
+	
 	// Privates
 	private float timeLeft = 0.0f;
 	private Enemy target = null;
@@ -23,7 +28,10 @@ public class Tower : MonoBehaviour {
 	
 	// EVENTS
 	void Start() {
-		StartCoroutine(FadeIn());	
+		muzzleFlash.enabled = false;
+		muzzleLight.enabled = false;
+		
+		StartCoroutine(BuildEffect());	
 	}
 	void Update() {
 		if (Network.isClient) {
@@ -38,11 +46,7 @@ public class Tower : MonoBehaviour {
 			if (timeLeft <= 0.0f) {		
 				// Target is within range, start firing
 				if (Vector3.Distance (transform.position, target.transform.position) <= range) {
-					Projectile p = (Projectile)Network.Instantiate(bulletPrefab, transform.position, Quaternion.identity, 0);
-					p.damage = bulletDamage;
-					// TODO: this always homes to target
-					p.destination = target.transform;
-					
+					Fire(transform.position, target.transform);	
 					timeLeft = interval;
 				}
 				// Previous target is too far away, find new target
@@ -72,6 +76,25 @@ public class Tower : MonoBehaviour {
 	}
 	
 	
+	// FUNCTIONS
+	void Fire(Vector3 startPos, Transform target) {
+		Projectile p = (Projectile)Network.Instantiate(bulletPrefab, startPos, Quaternion.identity, 0);
+		p.damage = bulletDamage;
+		p.destination = target.transform;
+		
+		// Inform clients that we are shooting, so they can display effects
+		networkView.RPC("ClientFire", RPCMode.Others);
+	}
+	
+	
+	// SERVER -> CLIENT RPC
+	[RPC]
+	void ClientFire() {
+		audio.PlayOneShot(firesound, 0.4F);
+		StartCoroutine(FireEffect());
+	}
+	
+	
 	// HELPER FUNCTIONS
 	private Enemy findClosestTarget() {
 		Enemy closest = null;
@@ -90,8 +113,9 @@ public class Tower : MonoBehaviour {
 		return closest;
 	}
 	
+	
 	// CO-ROUTINES
-	IEnumerator FadeIn() {
+	IEnumerator BuildEffect() {
 		for (float f = 0.0f; f < 1.0f; f += 0.05f) {
 			foreach (MeshRenderer r in GetComponentsInChildren(typeof(MeshRenderer))) {
 				Color c = r.material.color;
@@ -100,5 +124,12 @@ public class Tower : MonoBehaviour {
 			}
 			yield return null;
 		}
+	}
+	IEnumerator FireEffect () {
+		muzzleFlash.renderer.enabled = true;
+		muzzleLight.enabled = true;
+		yield return new WaitForSeconds(0.08f);	
+		muzzleFlash.renderer.enabled = false;
+		muzzleLight.enabled = false;
 	}
 }
