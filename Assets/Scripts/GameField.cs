@@ -1,14 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using Pathfinding;
 
+[RequireComponent(typeof(NetworkView))]
 public class GameField : MonoBehaviour {
 
 	// Settings
 	public Enemy enemyPrefab = null;
 	public GameObject[] spawnPoints;
 	public Transform endPoint;
-		
+	
 	// References - resolved at runtime
 	private Player player = null;
 	
@@ -103,114 +105,13 @@ public class GameField : MonoBehaviour {
 			}
 		}
 	}
-
-		
+	
 	
 	// FUNCTIONS
 	public void SpawnEnemy() {
 		// Spawn enemy at random spawnpoint and set destination
 		Enemy enemy = (Enemy)Network.Instantiate(enemyPrefab, spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position, Quaternion.identity, 0);
 		enemy.SetDestination(endPoint.position);
-	}
-	public Vector3 GetEndpoint() {
-		return endPoint.position;
-	}
-	
-	
-	// Called from client on server
-	[RPC]
-	void BuildTower(int id, string towerType, NetworkMessageInfo senderInfo) {
-		if (Network.isClient) { // TODO: is this required?
-			return;		
-		}
-		
-		// Check that this player actually owns the gamefield
-		PlayerManager.PlayerInfo info = PlayerManager.GetPlayerInfo(senderInfo.sender);
-		if (info == null) {
-			Debug.Log ("Error resolving playerinfo!");
-			return;
-		}
-		if (info.gameField != this) {
-			Debug.Log ("This player does not own the gamefield!");
-			return;
-		}
-		Player player = info.player;
-		
-		Tile[] tiles = gameObject.GetComponentsInChildren<Tile>();
-		foreach(Tile tile in tiles) {
-			if (tile.id == id) {
-				// TODO: check if tile is available?? (should be disabled otherwise)
-				
-				// Load tower prefab
-				Tower towerPrefab = Resources.Load<Tower>(towerType);
-				
-				// Check if player has enough money to buy tower
-				int price = towerPrefab.buildPrice;
-				if (player.gold < price) {
-					return;
-				}
-				player.gold -= price;
-				player.networkView.RPC ("SetGold", RPCMode.Others, player.gold);
-
-				// Instantiate the tower on all clients
-				Tower tower = (Tower)Network.Instantiate(towerPrefab, tile.transform.position, tile.transform.rotation, 0);
-				// Link the tower and the tile.
-				tile.tower = tower;
-				tower.tile = tile;
-				// Hide the tile.
-				tile.enabled = false;
-				
-				// Update pathfinding to include the tower we just made
-				GameObject graphUpdater = transform.Find("GraphUpdater").gameObject;
-				graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
-				// Iterate through all units and update their current route
-				Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
-				foreach (Enemy enemy in enemies) {
-					enemy.SetDestination(enemy.vDestination);
-				}
-			}
-		}		
-	}
-	[RPC]
-	void SellTower(int tileId, NetworkMessageInfo senderInfo) {
-		if (Network.isClient) { // TODO: is this required?
-			return;		
-		}
-		
-		Debug.Log ("Selling towah");
-		
-		// Check that this player actually owns the gamefield
-		PlayerManager.PlayerInfo info = PlayerManager.GetPlayerInfo(senderInfo.sender);
-		if (info == null) {
-			Debug.Log ("Error resolving playerinfo!");
-			return;
-		}
-		if (info.gameField != this) {
-			Debug.Log ("This player does not own this gamefield!");
-			return;
-		}
-		
-		// Get the tower using the tileId
-		Tower tower = null;
-		Tile[] tiles = gameObject.GetComponentsInChildren<Tile>();
-		foreach (Tile tile in tiles) {
-			if (tile.id == tileId) {
-				if (tile.tower == null) {
-					Debug.Log ("The selected tower does not belong to a tile");
-					return;
-				}
-				tower = tile.tower;
-				break;
-			}
-		}
-		
-		// Give the player money back
-		Player player = info.player;
-		player.gold += tower.sellPrice;
-		player.networkView.RPC ("SetGold", RPCMode.Others, player.gold);
-		
-		// Now remove the tower on the server and all clients
-		Network.Destroy(tower.gameObject);
 	}
 }
 

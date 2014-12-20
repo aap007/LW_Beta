@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(NetworkView))]
 public class Tower : MonoBehaviour {
 
 	// Settings
@@ -15,15 +16,15 @@ public class Tower : MonoBehaviour {
 	public int buildPrice = 1;
 	public int sellPrice = 1;
 	
-	[HideInInspector]
-	public Tile tile;
-	
 	// Privates
 	private float timeLeft = 0.0f;
 	private Enemy target = null;
 
 	
 	// EVENTS
+	void Start() {
+		StartCoroutine(FadeIn());	
+	}
 	void Update() {
 		if (Network.isClient) {
 			return;
@@ -38,7 +39,6 @@ public class Tower : MonoBehaviour {
 				// Target is within range, start firing
 				if (Vector3.Distance (transform.position, target.transform.position) <= range) {
 					Projectile p = (Projectile)Network.Instantiate(bulletPrefab, transform.position, Quaternion.identity, 0);
-					//Projectile b = g.GetComponent<Projectile> ();
 					p.damage = bulletDamage;
 					// TODO: this always homes to target
 					p.destination = target.transform;
@@ -66,15 +66,8 @@ public class Tower : MonoBehaviour {
 	}
 	void OnMouseDown() {
 		if (Network.isClient) {
-			// TODO: Ask the server to sell this tower, given the ID of the tile this tower is built on.
-			/*
-			GameField gameField = PlayerManager.GetGameField();
-			if (gameField == null) {
-				Debug.Log("Error resolving current GameField on client");
-				return;
-			}
-			gameField.networkView.RPC("SellTower", RPCMode.Server, tile.id);
-			*/
+			// TODO: Ask the server to sell this tower
+			//Player.GetNetworkView().RPC("SellTower", RPCMode.Server, tileId);
 		}
 	}
 	
@@ -95,5 +88,17 @@ public class Tower : MonoBehaviour {
 			}
 		}
 		return closest;
+	}
+	
+	// CO-ROUTINES
+	IEnumerator FadeIn() {
+		for (float f = 0.0f; f < 1.0f; f += 0.05f) {
+			foreach (MeshRenderer r in GetComponentsInChildren(typeof(MeshRenderer))) {
+				Color c = r.material.color;
+				c.a = f;
+				r.material.color = c;
+			}
+			yield return null;
+		}
 	}
 }

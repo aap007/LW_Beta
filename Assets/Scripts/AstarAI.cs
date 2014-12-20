@@ -27,13 +27,7 @@ public class AstarAI : MonoBehaviour {
 	//The waypoint we are currently moving towards
 	private int currentWaypoint = 0;
 	
-	public void Start () {
-		//seeker = GetComponent<Seeker>();
-		//controller = GetComponent<CharacterController>();
-		
-		//Start a new path to the targetPosition, return the result to the OnPathComplete function
-		//seeker.StartPath (transform.position,targetPosition, OnPathComplete);
-	}
+
 	public void SetDestination(Vector3 destination) {
 		seeker = GetComponent<Seeker>();
 		controller = GetComponent<CharacterController>();
@@ -44,22 +38,18 @@ public class AstarAI : MonoBehaviour {
 	}
 	
 	public void OnPathComplete (Path p) {
-		Debug.Log ("Yay, we got a path back. Did it have an error? "+p.error);
 		if (!p.error) {
 			path = p;
-			//Reset the waypoint counter
 			currentWaypoint = 0;
 		}
 	}
 	
 	public void FixedUpdate () {
 		if (path == null) {
-			//We have no path to move after yet
 			return;
 		}
 		
 		if (currentWaypoint >= path.vectorPath.Count) {
-			Debug.Log ("End Of Path Reached");
 			return;
 		}
 		
@@ -72,11 +62,11 @@ public class AstarAI : MonoBehaviour {
 		Vector3 point = path.vectorPath[currentWaypoint];
 		point.y = compass.position.y;
 		compass.LookAt(point);
-		body.rotation = Quaternion.Lerp(body.rotation, compass.rotation, Time.deltaTime * turnSpeed);
-
+		// We need to update transform.rotation, because this is what is synced to clients.
+		transform.rotation = Quaternion.Lerp(transform.rotation, compass.rotation, Time.deltaTime * turnSpeed);
 		
-		//Check if we are close enough to the next waypoint
-		//If we are, proceed to follow the next waypoint
+		// Check if we are close enough to the next waypoint
+		// If we are, proceed to follow the next waypoint
 		// Removed the y axis for more precise smooting (we don't use the y-axis in pathfinding anyway) 
 		Vector3 distance = transform.position - path.vectorPath[currentWaypoint];
 		distance.y = 0;

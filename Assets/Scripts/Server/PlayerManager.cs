@@ -74,7 +74,7 @@ public class PlayerManager : MonoBehaviour {
 		
 	public void SpawnPlayer(NetworkPlayer networkPlayer) {
 		// Position the camera of the player at a birds-eye view of the gamefield
-		Vector3 playerPos = new Vector3(GAMEFIELD_OFFSET*GetPlayerCount(), 0, 0);
+		Vector3 playerPos = new Vector3(GAMEFIELD_OFFSET*playerInfoTracker.Count, 0, 0);
 		playerPos.x += 4;
 		playerPos.y += 10;
 		playerPos.z -= 4;
@@ -82,13 +82,15 @@ public class PlayerManager : MonoBehaviour {
 		// Create a player and a gamefield
 		// For each player that joins, a gamefield is created with an offset on the X-axis
 		Player player = (Player)Network.Instantiate(playerPrefab, playerPos, playerPrefab.transform.rotation, 0);
-		GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(GAMEFIELD_OFFSET*GetPlayerCount(), 0, 0), Quaternion.identity, 0);
+		GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(GAMEFIELD_OFFSET*playerInfoTracker.Count, 0, 0), Quaternion.identity, 0);
 		
 		// Link player to gamefield, but only on the server; client doesn't need to know
 		playerInfoTracker.Add(new PlayerInfo(networkPlayer, player, gameField));
+		// Also add a reference in the player object, used in many RPC calls.
+		player.gameField = gameField;		
 		
 		// Set the owner (=owning client) for the created player
-		NetworkView clientNetView = GetPlayerNetworkView(player);
+		NetworkView clientNetView = player.GetComponent<NetworkView>();
 		clientNetView.RPC("SetOwner", RPCMode.All, networkPlayer);
 	}
 	public void RemovePlayer(NetworkPlayer player) {
@@ -97,9 +99,9 @@ public class PlayerManager : MonoBehaviour {
 	public GameField GetNextGamefield(Player p){
 		GameField retVal = null;
 		
-		for(int i = 0; GetPlayerCount() > i; i++){
+		for(int i = 0; playerInfoTracker.Count > i; i++){
 			if(playerInfoTracker[i].player == p){
-				if(GetPlayerCount() - 1 == i){
+				if(playerInfoTracker.Count - 1 == i){
 					retVal = playerInfoTracker[0].gameField;
 				}
 				else{
@@ -113,11 +115,6 @@ public class PlayerManager : MonoBehaviour {
 	
 
 	// HELPER FUNCTIONS
-	private NetworkView GetPlayerNetworkView(Player player) {
-		return (NetworkView)player.GetComponent<NetworkView>();
-	}
-	private int GetPlayerCount() {
-		return playerInfoTracker.Count;
-	}
+
 
 }
