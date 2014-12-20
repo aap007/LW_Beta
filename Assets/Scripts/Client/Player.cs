@@ -31,27 +31,6 @@ public class Player : MonoBehaviour {
 	}
 
 
-	// Used to get the NetworkView for the current player.
-	// ONLY works when called on CLIENTSIDE.
-	public static NetworkView GetNetworkView() {
-		if (Network.isClient) {
-			// Return the network view of the player with an active camera,
-			// which is only one: the active player on the calling client.
-			Player[] playerList = (Player[])FindObjectsOfType(typeof(Player));
-			foreach (Player p in playerList) {
-				if (p.GetComponent<Camera>().enabled == true) {
-					return p.GetComponent<NetworkView>();
-				}
-			}
-			return null;
-		}
-		else {
-			Debug.Log("GetNetworkView() only supported on client");
-			return null;
-		}
-	}
-	
-
 	// Called from server on clients
 	[RPC]
 	void SetOwner(NetworkPlayer p) {
@@ -104,7 +83,9 @@ public class Player : MonoBehaviour {
 			GameField nextGameField = playerManager.GetNextGamefield(this);
 			
 			if(nextGameField != null){
-				nextGameField.SpawnEnemy();
+				// Give the function a reference to this player object on the server,
+				// so the gamefield can give the spawned enemy an owner.
+				nextGameField.SpawnEnemy(this);
 			}
 			else{
 				Debug.Log("ERROR: No next player");
@@ -187,6 +168,29 @@ public class Player : MonoBehaviour {
 		// Now remove the tower on the server and all clients
 		Network.Destroy(tower.gameObject);
 	}
+	
+	
+	// HELPER FUNCTIONS
+	// Used to get the NetworkView for the current player.
+	// ONLY works when called on CLIENT.
+	public static NetworkView GetNetworkView() {
+		if (Network.isClient) {
+			// Return the network view of the player with an active camera,
+			// which is only one: the active player on the calling client.
+			Player[] playerList = (Player[])FindObjectsOfType(typeof(Player));
+			foreach (Player p in playerList) {
+				if (p.GetComponent<Camera>().enabled == true) {
+					return p.GetComponent<NetworkView>();
+				}
+			}
+			return null;
+		}
+		else {
+			Debug.Log("GetNetworkView() only supported on client");
+			return null;
+		}
+	}
+	
 	
 	void OnGUI() {
 		if (Network.isServer) {

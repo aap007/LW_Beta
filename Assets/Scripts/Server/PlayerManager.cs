@@ -40,38 +40,6 @@ public class PlayerManager : MonoBehaviour {
 
 
 	// FUNCTIONS
-	
-	// Find the player belonging to a certain gamefield
-	public static Player GetPlayer(GameField g) {
-		foreach (PlayerInfo playerInfo in playerInfoTracker) {
-			if (playerInfo.gameField == g) {
-				return playerInfo.player;
-			}
-		}
-		return null;
-	}
-	// Use this function to get player information for the current player.
-	// This will ONLY work when called on the SERVER using the
-	// Network.player from the CLIENT as argument for this function.
-	// To get the client Network.player use NetworkMessageInfo.sender
-	// from the RPC call from client to server.
-	public static PlayerInfo GetPlayerInfo(NetworkPlayer p) {
-		foreach (PlayerInfo playerInfo in playerInfoTracker) {
-			if (playerInfo.networkPlayer == p) {
-				return playerInfo;
-			}
-		}
-		return null;
-	}
-	public static PlayerInfo GetPlayerInfo(GameField g) {
-		foreach (PlayerInfo playerInfo in playerInfoTracker) {
-			if (playerInfo.gameField == g) {
-				return playerInfo;
-			}
-		}
-		return null;
-	}
-		
 	public void SpawnPlayer(NetworkPlayer networkPlayer) {
 		// Position the camera of the player at a birds-eye view of the gamefield
 		Vector3 playerPos = new Vector3(GAMEFIELD_OFFSET*playerInfoTracker.Count, 0, 0);
@@ -85,9 +53,9 @@ public class PlayerManager : MonoBehaviour {
 		GameField gameField = (GameField)Network.Instantiate(gameFieldPrefab, new Vector3(GAMEFIELD_OFFSET*playerInfoTracker.Count, 0, 0), Quaternion.identity, 0);
 		
 		// Link player to gamefield, but only on the server; client doesn't need to know
+		player.gameField = gameField;
+		gameField.player = player;
 		playerInfoTracker.Add(new PlayerInfo(networkPlayer, player, gameField));
-		// Also add a reference in the player object, used in many RPC calls.
-		player.gameField = gameField;		
 		
 		// Set the owner (=owning client) for the created player
 		NetworkView clientNetView = player.GetComponent<NetworkView>();
@@ -115,6 +83,26 @@ public class PlayerManager : MonoBehaviour {
 	
 
 	// HELPER FUNCTIONS
-
+	// Use this function to get player information for the current player.
+	// This will ONLY work when called on the SERVER using the
+	// Network.player from the CLIENT as argument for this function.
+	// To get the client Network.player use NetworkMessageInfo.sender
+	// from the RPC call from client to server.
+	public static PlayerInfo GetPlayerInfo(NetworkPlayer p) {
+		foreach (PlayerInfo playerInfo in playerInfoTracker) {
+			if (playerInfo.networkPlayer == p) {
+				return playerInfo;
+			}
+		}
+		return null;
+	}
+	public static PlayerInfo GetPlayerInfo(GameField g) {
+		foreach (PlayerInfo playerInfo in playerInfoTracker) {
+			if (playerInfo.gameField == g) {
+				return playerInfo;
+			}
+		}
+		return null;
+	}
 
 }

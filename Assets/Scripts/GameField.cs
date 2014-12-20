@@ -11,8 +11,9 @@ public class GameField : MonoBehaviour {
 	public GameObject[] spawnPoints;
 	public Transform endPoint;
 	
-	// References - resolved at runtime
-	private Player player = null;
+	// References
+	[HideInInspector]
+	public Player player = null;
 	
 	
 	// EVENTS
@@ -88,29 +89,37 @@ public class GameField : MonoBehaviour {
 			return;
 		}
 		
-		// Resolve player belonging to this gamefield once at runtime
-		if (player == null) {
-			player = PlayerManager.GetPlayer(this);
-		}
-		
 		// XXX: Is this efficient? Better let objects check themselves if they collide with endPoint.
+		// TODO: this should also be done every 0.5 (or so) seconds, instead of every frame!
 		Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
 		float range = endPoint.collider.bounds.size.x / 4;
-		for (int i = 0; i < enemies.Length; ++i) {
-			if (Vector3.Distance(endPoint.position, enemies[i].transform.position) <= range) {			
-				Network.Destroy(enemies[i].gameObject.networkView.viewID);
-				
+		foreach (Enemy enemy in enemies) {
+			if (Vector3.Distance(endPoint.position, enemy.transform.position) <= range) {		
+				// This player has "leaked", so remove a life
+				// TODO: combine this in a single function which updates life on server + all clients
 				player.life -= 1;
-				player.networkView.RPC("SetLife", RPCMode.All, player.life);
+				player.networkView.RPC("SetLife", RPCMode.Others, player.life);
+				
+				Debug.Log ("Server GameField update, enemy.owner: " + enemy.owner);
+				// Add a life for the player that owned the enemy
+				Debug.Log ("Life before: " + enemy.owner.life);
+				enemy.owner.life += 1;
+				Debug.Log ("Life after: " + enemy.owner.life);
+				enemy.owner.networkView.RPC("SetLife", RPCMode.Others, enemy.owner.life);
+				
+				Network.Destroy(enemy.gameObject.networkView.viewID);
 			}
 		}
 	}
 	
 	
 	// FUNCTIONS
-	public void SpawnEnemy() {
-		// Spawn enemy at random spawnpoint and set destination
+	public void SpawnEnemy(Player originator) {
+		// Spawn enemy at random spawnpoint
 		Enemy enemy = (Enemy)Network.Instantiate(enemyPrefab, spawnPoints[Random.Range(0, spawnPoints.Length)].transform.position, Quaternion.identity, 0);
+		// Update value on server
+		enemy.owner = originator; 
+		// Set endpoint for A* pathfinding of this enemy
 		enemy.SetDestination(endPoint.position);
 	}
 }
