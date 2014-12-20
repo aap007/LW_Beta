@@ -45,7 +45,6 @@ public class PlayerManager : MonoBehaviour {
 		Vector3 playerPos = new Vector3(GAMEFIELD_OFFSET*playerInfoTracker.Count, 0, 0);
 		playerPos.x += 4;
 		playerPos.y += 14;
-		playerPos.z -= 4;
 		
 		// Create a player and a gamefield
 		// For each player that joins, a gamefield is created with an offset on the X-axis
