@@ -143,8 +143,7 @@ public class Player : MonoBehaviour {
 				GameObject graphUpdater = gameField.transform.Find("GraphUpdater").gameObject;
 				graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
 				// Iterate through all units and update their current route
-				Enemy[] enemies = (Enemy[])FindObjectsOfType(typeof(Enemy));
-				foreach (Enemy enemy in enemies) {
+				foreach (Enemy enemy in gameField.enemyList) {
 					enemy.SetDestination(enemy.vDestination);
 				}
 			}
