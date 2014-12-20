@@ -80,8 +80,17 @@ public class Player : MonoBehaviour {
 	[RPC]
 	void SpawnEnemy() {
 		if (Network.isServer) {
-			GameField nextGameField = playerManager.GetNextGamefield(this);
+			// Check if player has enough money to buy this unit
+			// TODO: support for multiple unit types
+			Enemy enemyPrefab = Resources.Load<Enemy>("EnemyPrefab");
+			int price = enemyPrefab.price;
+			if (gold < price) {
+				return;
+			}
+			gold -= price;
+			networkView.RPC ("SetGold", RPCMode.Others, gold);
 			
+			GameField nextGameField = playerManager.GetNextGamefield(this);
 			if(nextGameField != null){
 				// Give the function a reference to this player object on the server,
 				// so the gamefield can give the spawned enemy an owner.

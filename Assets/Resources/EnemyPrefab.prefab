@@ -289,6 +289,8 @@ MonoBehaviour:
   health: 5
   speed: 50
   price: 1
+  owner: {fileID: 0}
+  gameField: {fileID: 0}
   vDestination: {x: 0, y: 0, z: 0}
 --- !u!114 &11400002
 MonoBehaviour:
