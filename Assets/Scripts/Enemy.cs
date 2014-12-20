@@ -20,7 +20,12 @@ public class Enemy : MonoBehaviour {
 	// Destination for pathfinding
 	[HideInInspector]
 	public Vector3 vDestination;
-
+	
+	// EVENTS
+	void Start (){
+		CharacterController c = GetComponent<CharacterController>();
+		c.detectCollisions = false;
+	}
 
 	// FUNCTIONS
 	// TODO: this function is ugly.
