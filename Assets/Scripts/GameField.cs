@@ -80,7 +80,7 @@ public class GameField : MonoBehaviour {
 			// Below settings are for collision detection
 			gg.cutCorners = false;
 			gg.erodeIterations = 0;
-			gg.collision.type = ColliderType.Capsule;
+			gg.collision.type = ColliderType.Sphere;
 			gg.collision.diameter = 0;
 			gg.collision.height = 2;
 			gg.collision.mask = 0;

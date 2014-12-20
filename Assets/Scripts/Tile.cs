@@ -14,6 +14,8 @@ public class Tile : MonoBehaviour {
 			// Ask the server to build us a tower. The server will check if this player also
 			// owns the gamefield for which a tower is requested.
 			Player.GetNetworkView().RPC("BuildTower", RPCMode.Server, id, "TowerPrefab");
+			
+			Debug.Log ("Player click on tile: "+id);
 		}
 	}
 }

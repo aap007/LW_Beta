@@ -21,11 +21,12 @@ public class Tower : MonoBehaviour {
 	
 	public AudioClip firesound;
 	
+	public int tileId;
+	
 	// Privates
 	private float timeLeft = 0.0f;
 	private Enemy target = null;
 	private GameField gameField = null;
-
 	
 	// EVENTS
 	void Start() {
@@ -80,8 +81,9 @@ public class Tower : MonoBehaviour {
 	}
 	void OnMouseDown() {
 		if (Network.isClient) {
-			// TODO: Ask the server to sell this tower
-			//Player.GetNetworkView().RPC("SellTower", RPCMode.Server, tileId);
+			// Ask the server to sell this tower
+			// TODO: make upgrade/sell menu
+			Player.GetNetworkView().RPC("SellTower", RPCMode.Server, tileId);
 		}
 	}
 	
@@ -102,6 +104,10 @@ public class Tower : MonoBehaviour {
 	void ClientFire() {
 		audio.PlayOneShot(firesound, 0.4F);
 		StartCoroutine(FireEffect());
+	}
+	[RPC]
+	void SetTileId(int id) {
+		tileId = id;
 	}
 	
 	

@@ -138,6 +138,8 @@ public class Player : MonoBehaviour {
 				Tower tower = (Tower)Network.Instantiate(towerPrefab, tile.transform.position, tile.transform.rotation, 0);
 				// Make tower gameobject child of the tile it's built on
 				tower.transform.parent = tile.transform;
+				tower.tileId = id;
+				tower.networkView.RPC ("SetTileId", RPCMode.Others, id);
 				
 				// Update pathfinding to include the tower we just made
 				GameObject graphUpdater = gameField.transform.Find("GraphUpdater").gameObject;
@@ -150,7 +152,7 @@ public class Player : MonoBehaviour {
 		}		
 	}
 	[RPC]
-	void SellTower(int towerId, NetworkMessageInfo senderInfo) {
+	void SellTower(int tileId, NetworkMessageInfo senderInfo) {
 		if (Network.isClient) { // TODO: is this required?
 			return;
 		}
@@ -165,16 +167,31 @@ public class Player : MonoBehaviour {
 			Debug.Log ("This player does not own the gamefield!");
 			return;
 		}
-		
-		// TODO: implement
-		Tower tower = null;
-		
-		// Give the player money back
-		gold += tower.sellPrice;
-		networkView.RPC ("SetGold", RPCMode.Others, gold);
-		
-		// Now remove the tower on the server and all clients
-		Network.Destroy(tower.gameObject);
+
+		// Find Tile
+		Tile[] tiles = gameField.GetComponentsInChildren<Tile>();
+		foreach(Tile tile in tiles) {
+			if (tile.id == tileId) {
+				if (tile.transform.childCount > 0){
+					Tower tower = tile.transform.GetChild(0).gameObject.GetComponent<Tower>();
+					
+					// Give the player money back
+					gold += tower.sellPrice;
+					networkView.RPC ("SetGold", RPCMode.Others, gold);
+					
+					// Now remove the tower on the server and all clients
+					Network.Destroy(tower.gameObject);
+					
+					// Update pathfinding to include the tower we just made
+					GameObject graphUpdater = gameField.transform.Find("GraphUpdater").gameObject;
+					graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
+					// Iterate through all units and update their current route
+					foreach (Enemy enemy in gameField.enemyList) {
+						enemy.SetDestination(enemy.vDestination);
+					}
+				}
+			}
+		}
 	}
 	
 	
