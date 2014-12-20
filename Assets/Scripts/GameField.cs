@@ -108,17 +108,7 @@ public class GameField : MonoBehaviour {
 			List<Enemy> tempEnemyList = new List<Enemy>(enemyList);
 			foreach (Enemy enemy in tempEnemyList) {
 				if (Vector3.Distance(endPoint.position, enemy.transform.position) <= range) {		
-					// This player has "leaked", so remove a life
-					// TODO: combine this in a single function which updates life on server + all clients
-					player.life -= 1;
-					player.networkView.RPC("SetLife", RPCMode.Others, player.life);
-					
-					// Add a life for the player that owned the enemy
-					enemy.owner.life += 1;
-					enemy.owner.networkView.RPC("SetLife", RPCMode.Others, enemy.owner.life);
-					
-					// Remove from server and all clients
-					RemoveEnemy(enemy);
+					EnemyLeaked(enemy);
 				}
 			}
 			timeLeft = interval;
@@ -137,7 +127,29 @@ public class GameField : MonoBehaviour {
 		// Set endpoint for A* pathfinding of this enemy
 		enemy.SetDestination(endPoint.position);
 	}
-	public void RemoveEnemy(Enemy enemy) {
+	// Called when an enemy reached the endpoint of a gamefield
+	public void EnemyLeaked(Enemy enemy) {
+		// This player has "leaked", so remove a life
+		// TODO: combine this in a single function which updates life on server + all clients
+		player.life -= 1;
+		player.networkView.RPC("SetLife", RPCMode.Others, player.life);
+		
+		// Add a life for the player that owned the enemy
+		enemy.owner.life += 1;
+		enemy.owner.networkView.RPC("SetLife", RPCMode.Others, enemy.owner.life);
+
+		lock (enemyList) {
+			enemyList.Remove(enemy);
+			Network.Destroy(enemy.gameObject.networkView.viewID);
+		}		
+	}
+	// Called from Enemy class when the enemy is killed.
+	public void EnemyKilled(Enemy enemy) {
+		// Give player of this gamefield money
+		// TODO:  how much has to be decided
+		player.gold += enemy.price;
+		player.networkView.RPC("SetGold", RPCMode.Others, player.gold);
+		
 		lock (enemyList) {
 			enemyList.Remove(enemy);
 			Network.Destroy(enemy.gameObject.networkView.viewID);
