@@ -32,13 +32,16 @@ public class Tower : MonoBehaviour {
 		muzzleFlash.enabled = false;
 		muzzleLight.enabled = false;
 		
-		// Get Gamefield through following relation: GameField -> Tile -> Tower
-		gameField = transform.parent.parent.gameObject.GetComponent<GameField>();
-		if (gameField == null) {
-			Debug.Log ("Tower: error resolving gamefield");
+		if (Network.isServer) {
+			// Get Gamefield through following relation: GameField -> Tile -> Tower
+			gameField = transform.parent.parent.gameObject.GetComponent<GameField>();
+			if (gameField == null) {
+				Debug.Log ("Tower: error resolving gamefield");
+			}
 		}
-		
-		StartCoroutine(BuildEffect());	
+		if (Network.isClient) {
+			StartCoroutine(BuildEffect());
+		}
 	}
 	void Update() {
 		if (Network.isClient) {
@@ -121,11 +124,13 @@ public class Tower : MonoBehaviour {
 	
 	// CO-ROUTINES
 	IEnumerator BuildEffect() {
-		for (float f = 0.0f; f < 1.0f; f += 0.05f) {
+		for (float f = 0.0f; f < 1.0f; f += 0.03f) {
 			foreach (MeshRenderer r in GetComponentsInChildren(typeof(MeshRenderer))) {
 				Color c = r.material.color;
-				c.a = f;
-				r.material.color = c;
+				if (c != null) {
+					c.a = f;
+					r.material.color = c;
+				}
 			}
 			yield return null;
 		}
