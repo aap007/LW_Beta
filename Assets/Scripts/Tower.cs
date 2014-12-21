@@ -132,8 +132,8 @@ public class Tower : MonoBehaviour {
 	IEnumerator BuildEffect() {
 		for (float f = 0.0f; f < 1.0f; f += 0.03f) {
 			foreach (MeshRenderer r in GetComponentsInChildren(typeof(MeshRenderer))) {
-				Color c = r.material.color;
-				if (c != null) {
+				if(r.material.HasProperty("_Color")){
+					Color c = r.material.color;
 					c.a = f;
 					r.material.color = c;
 				}

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 [RequireComponent(typeof(NetworkView))]
@@ -8,6 +9,10 @@ public class Player : MonoBehaviour {
 	// the server instantiated the prefab for, where this script is attached
 	[HideInInspector]
 	public NetworkPlayer owner;
+	
+	// GUI to be used
+	[SerializeField]
+	GameObject playerCanvasPrefab;
 	
 	// Properties of a player.
 	public int life;
@@ -39,6 +44,13 @@ public class Player : MonoBehaviour {
 			// So it just so happens that WE are the player in question,
 			// which means we can enable this control again
 			enabled = true;
+			
+			// Create Canvas and assign events to buttons
+			// TODO: add gold en money to canvas. Maybe move this to a seperate function to keep it organized.
+			GameObject canvas = (GameObject)Instantiate(playerCanvasPrefab);
+			Button btnSpawnCreep = canvas.transform.FindChild("SpawnCreepButton").GetComponent<Button>();
+			btnSpawnCreep.onClick.AddListener(() => { networkView.RPC("SpawnEnemy", RPCMode.Server); });
+
 		}
 		else {
 			// Disable a bunch of other things here that are not interesting
@@ -216,7 +228,6 @@ public class Player : MonoBehaviour {
 		}
 	}
 	
-	
 	void OnGUI() {
 		if (Network.isServer) {
 			return; // Get lost, this is the client side
@@ -224,9 +235,5 @@ public class Player : MonoBehaviour {
 			
 		GUI.Label(new Rect(0, 0, 400, 200), "Life: " + life);	
 		GUI.Label(new Rect(0, 10, 400, 200), "Gold: " + gold);
-		
-		if (GUI.Button (new Rect(100, 20, 125, 50), "Spawn")){
-			networkView.RPC("SpawnEnemy", RPCMode.Server);
-		}
 	}
 }

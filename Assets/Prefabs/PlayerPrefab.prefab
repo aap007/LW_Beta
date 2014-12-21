@@ -92,6 +92,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   life: 20
   gold: 5
+  playerCanvasPrefab: {fileID: 100002, guid: 98b250652cfe2f545b7af37f5d54c9f6, type: 2}
   gameField: {fileID: 0}
 --- !u!124 &12400000
 Behaviour:
