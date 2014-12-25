@@ -21,6 +21,7 @@ public class Tower : MonoBehaviour {
 	
 	public AudioClip firesound;
 	
+	[HideInInspector]
 	public int tileId;
 	
 	// Privates
@@ -45,29 +46,35 @@ public class Tower : MonoBehaviour {
 		}
 	}
 	void Update() {
-		if (Network.isClient) {
-			return;
-		}
-		
-		if (target == null) {
-			target = findClosestTarget();
-		}
-		else {
-			timeLeft -= Time.deltaTime;
-			if (timeLeft <= 0.0f) {		
-				// Target is within range, start firing
-				if (Vector3.Distance (transform.position, target.transform.position) <= range) {
-					Fire(transform.position, target.transform);	
-					timeLeft = interval;
-				}
-				// Previous target is too far away, find new target
-				// TODO: fix
-				else {
-					target = findClosestTarget();
+		// Server checks for nearest target and stores this on client and server
+		// Then the server spawns the projectile and informs the client via ClientFire.
+		if (Network.isServer) {
+			// Check for new target, if found, inform client
+			// TODO: reduce interval of scanning for enemies,
+			// every frame seems a bit too much.
+			if (target == null) {
+				target = FindClosestTarget();
+				if (target != null) {
+					networkView.RPC ("SetTarget", RPCMode.Others, target.networkView.viewID);
 				}
 			}
-			
-			// is it close enough to turn?
+			// Handle firing logic based on interval settings
+			if (target != null) {
+				timeLeft -= Time.deltaTime;
+				if (timeLeft <= 0.0f) {
+					// Target is within range, start firing
+					if (Vector3.Distance (transform.position, target.transform.position) <= range) {
+						Fire();
+						timeLeft = interval;
+					}
+				}
+			}
+		}
+		// Client handles the rotation of the tower.
+		if (Network.isClient) {
+			if (target == null) {
+				return; // Wait for server to find a target
+			}
 			if (Vector3.Distance (transform.position, target.transform.position) <= rangeTurn) {
 				// Determine the rotation.
 				Quaternion targetRotation = Quaternion.LookRotation(transform.position - target.transform.position);
@@ -76,7 +83,7 @@ public class Tower : MonoBehaviour {
 				
 				// Smoothly rotate towards the target point.
 				transform.FindChild("Top").rotation = Quaternion.Slerp(transform.FindChild("Top").rotation, targetRotation, turnSpeed * Time.deltaTime);
-			}	
+			}
 		}
 	}
 	void OnMouseDown() {
@@ -89,17 +96,31 @@ public class Tower : MonoBehaviour {
 	
 	
 	// FUNCTIONS
-	void Fire(Vector3 startPos, Transform target) {
-		Projectile p = (Projectile)Network.Instantiate(bulletPrefab, startPos, Quaternion.identity, 0);
+	void Fire() {
+		// TODO: create empty gameobject in prefab that indicates the location of the barrel to spawn the bullets.
+		Projectile p = (Projectile)Network.Instantiate(bulletPrefab, transform.position, Quaternion.identity, 0);
 		p.damage = bulletDamage;
+		// Set destination on server projectile
 		p.destination = target.transform;
-		
+		// Set destination on client projectile
+		// TODO: the client tower also knows the current target,
+		// can we somehow optimize setting this target on the projectile?
+		p.networkView.RPC ("SetTarget", RPCMode.Others, target.networkView.viewID);
 		// Inform clients that we are shooting, so they can display effects
 		networkView.RPC("ClientFire", RPCMode.Others);
 	}
 	
 	
 	// SERVER -> CLIENT RPC
+	[RPC]
+	void SetTarget(NetworkViewID id) {
+		NetworkView view = NetworkView.Find(id);
+		if (view == null) {
+			Debug.Log ("Couldn't find tower target with view ID: " + view);
+			return;
+		}
+		target = view.gameObject.GetComponent<Enemy>();
+	}
 	[RPC]
 	void ClientFire() {
 		audio.PlayOneShot(firesound, 0.4F);
@@ -112,7 +133,7 @@ public class Tower : MonoBehaviour {
 	
 	
 	// HELPER FUNCTIONS
-	private Enemy findClosestTarget() {
+	private Enemy FindClosestTarget() {
 		lock(gameField.enemyList) {
 			Vector3 pos = transform.position;
 			Enemy closest = (gameField.enemyList.Count == 0 ? null : gameField.enemyList[0]);
