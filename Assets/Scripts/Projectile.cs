@@ -6,6 +6,7 @@ public class Projectile : MonoBehaviour {
 	// Settings
 	public float speed = 10.0f;
 	public int damage = 1;
+	public GameObject hitEffect;	
 	
 	// Destination set by Tower when creating the bullet
 	[HideInInspector]
@@ -22,18 +23,21 @@ public class Projectile : MonoBehaviour {
 			return;
 		}
 		
-		// Move towards the destination
+		// Move towards the destination and apply correct rotation
 		float stepSize = Time.deltaTime * speed;
 		transform.position = Vector3.MoveTowards(transform.position, destination.position, stepSize);
+		// TODO: use correct rotation for projectile.
+		//transform.rotation = Quaternion.LookRotation(destination.position - transform.position);
 		
-		// TODO: Use correct rotation for projectile
-		
-		// TODO: fixme
-		if (Network.isServer) {
-			if (transform.position.Equals(destination.position)) {
+		if (transform.position.Equals(destination.position)) {
+			if (Network.isClient) {
+				// TODO: use auto-destroy function of particle system
+				GameObject effect = (GameObject)Instantiate(hitEffect, transform.position, Quaternion.identity);
+				Destroy(effect, effect.GetComponent<ParticleSystem>().duration);
+			}
+			if (Network.isServer) {
 				Enemy enemy = destination.GetComponent<Enemy>();
 				enemy.TakeDamage(damage);
-				
 				// Destroy this projectile
 				Network.Destroy(gameObject);
 			}

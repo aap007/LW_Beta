@@ -5,7 +5,7 @@ using System.Collections;
 public class Tower : MonoBehaviour {
 
 	// Settings
-	public Projectile bulletPrefab = null;
+	public Projectile bulletPrefab;
 	public int bulletDamage = 1;
 	public float interval = 2.0f;
 	
@@ -20,6 +20,10 @@ public class Tower : MonoBehaviour {
 	public Light muzzleLight;
 	
 	public AudioClip firesound;
+	
+	// Reference to the part of the model that will be
+	// rotated towards enemies, i.e. the turret barrel.
+	public GameObject rotator;
 	
 	[HideInInspector]
 	public int tileId;
@@ -70,20 +74,21 @@ public class Tower : MonoBehaviour {
 				}
 			}
 		}
-		// Client handles the rotation of the tower.
-		if (Network.isClient) {
-			if (target == null) {
-				return; // Wait for server to find a target
-			}
-			if (Vector3.Distance (transform.position, target.transform.position) <= rangeTurn) {
-				// Determine the rotation.
-				Quaternion targetRotation = Quaternion.LookRotation(transform.position - target.transform.position);
-				targetRotation.x = 0;
-				targetRotation.z = 0;
-				
-				// Smoothly rotate towards the target point.
-				transform.FindChild("Top").rotation = Quaternion.Slerp(transform.FindChild("Top").rotation, targetRotation, turnSpeed * Time.deltaTime);
-			}
+		// Both client and server update turret rotation
+		// This is also done on server, because the server spawns the projectiles
+		// and needs to have an updates located of the turret to use as starting
+		// location for those projectiles.
+		if (target == null) {
+			return; // Wait for server to find a target
+		}
+		if (Vector3.Distance(transform.position, target.transform.position) <= rangeTurn) {
+			// Determine the rotation, only use the yaw-component.
+			Quaternion targetRotation = Quaternion.LookRotation(transform.position - target.transform.position);
+			targetRotation.x = 0;
+			targetRotation.z = 0;
+			Debug.DrawLine(transform.position,target.transform.position);
+			// Smoothly rotate towards the target point.
+			rotator.transform.rotation = Quaternion.Slerp(rotator.transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
 		}
 	}
 	void OnMouseDown() {
@@ -97,8 +102,8 @@ public class Tower : MonoBehaviour {
 	
 	// FUNCTIONS
 	void Fire() {
-		// TODO: create empty gameobject in prefab that indicates the location of the barrel to spawn the bullets.
-		Projectile p = (Projectile)Network.Instantiate(bulletPrefab, transform.position, Quaternion.identity, 0);
+		// TODO: spawning from muzzleflash position doesnt seem to work yet
+		Projectile p = (Projectile)Network.Instantiate(bulletPrefab, muzzleFlash.gameObject.transform.position, Quaternion.identity, 0);
 		p.damage = bulletDamage;
 		// Set destination on server projectile
 		p.destination = target.transform;

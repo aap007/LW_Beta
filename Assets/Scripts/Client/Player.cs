@@ -115,7 +115,7 @@ public class Player : MonoBehaviour {
 	}
 	[RPC]
 	void BuildTower(int id, string towerType, NetworkMessageInfo senderInfo) {
-		if (Network.isClient) { // TODO: is this required?
+		if (Network.isClient) {
 			return;		
 		}
 		
@@ -134,7 +134,7 @@ public class Player : MonoBehaviour {
 		foreach(Tile tile in tiles) {
 			if (tile.id == id) {
 				// TODO: check if tile is available (should be disabled otherwise)
-				
+
 				// Load tower prefab
 				Tower towerPrefab = Resources.Load<Tower>(towerType);
 				
@@ -147,25 +147,20 @@ public class Player : MonoBehaviour {
 				networkView.RPC ("SetGold", RPCMode.Others, gold);
 				
 				// Instantiate the tower on all clients
-				Tower tower = (Tower)Network.Instantiate(towerPrefab, tile.transform.position, tile.transform.rotation, 0);
+				Tower tower = (Tower)Network.Instantiate(towerPrefab, tile.transform.position, Quaternion.identity, 0);
 				// Make tower gameobject child of the tile it's built on
 				tower.transform.parent = tile.transform;
 				tower.tileId = id;
 				tower.networkView.RPC ("SetTileId", RPCMode.Others, id);
 				
 				// Update pathfinding to include the tower we just made
-				GameObject graphUpdater = gameField.transform.Find("GraphUpdater").gameObject;
-				graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
-				// Iterate through all units and update their current route
-				foreach (Enemy enemy in gameField.enemyList) {
-					enemy.SetDestination(enemy.vDestination);
-				}
+				UpdatePathfinding();
 			}
 		}		
 	}
 	[RPC]
 	void SellTower(int tileId, NetworkMessageInfo senderInfo) {
-		if (Network.isClient) { // TODO: is this required?
+		if (Network.isClient) {
 			return;
 		}
 		
@@ -194,13 +189,8 @@ public class Player : MonoBehaviour {
 					// Now remove the tower on the server and all clients
 					Network.Destroy(tower.gameObject);
 					
-					// Update pathfinding to include the tower we just made
-					GameObject graphUpdater = gameField.transform.Find("GraphUpdater").gameObject;
-					graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
-					// Iterate through all units and update their current route
-					foreach (Enemy enemy in gameField.enemyList) {
-						enemy.SetDestination(enemy.vDestination);
-					}
+					// Update pathfinding to include the tower we just removed
+					UpdatePathfinding();
 				}
 			}
 		}
@@ -208,6 +198,14 @@ public class Player : MonoBehaviour {
 	
 	
 	// HELPER FUNCTIONS
+	private void UpdatePathfinding() {
+		GameObject graphUpdater = gameField.transform.Find("GraphUpdater").gameObject;
+		graphUpdater.GetComponent<Pathfinding.GraphUpdateScene>().Apply(); 
+		// Iterate through all units and update their current route
+		foreach (Enemy enemy in gameField.enemyList) {
+			enemy.SetDestination(enemy.vDestination);
+		}
+	}
 	// Used to get the NetworkView for the current player.
 	// ONLY works when called on CLIENT.
 	public static NetworkView GetNetworkView() {
